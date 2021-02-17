@@ -1,0 +1,31 @@
+{
+  "name": "@liqd-js/pdf",
+  "description": "PDF rendering engine",
+  "version": "0.0.1",
+  "author": "radixxko",
+  "license": "MIT",
+  "main": "lib/pdf.js",
+  "homepage": "https://liqd-js.com/lib/template",
+  "files": [
+    "lib/"
+  ],
+  "scripts": {
+    "test": "nyc mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/liqd-js/pdf.git"
+  },
+  "keywords": [
+    "pdf",
+    "engine",
+    "liqd-js",
+    "liqd"
+  ],
+  "dependencies": {
+    "@liqd-js/parser": "^1.0.0",
+    "@liqd-js/template": "^0.3.0",
+    "pdfkit": "^0.11.0"
+  }
+}
