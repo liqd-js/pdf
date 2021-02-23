@@ -3,9 +3,17 @@
 /**/
 const PDF = require('../lib/pdf');
 //<page> </page>
-const Invoice = new PDF( '<pdf><header>Janko hrasko\n\ntest</header><table><td>{ $props.test }</td></table></pdf>' );
+const Invoice = new PDF( require('fs').readFileSync( __dirname + '/pdf.html', 'utf8' ));
 
-console.log( Invoice.render({ test: 'jozo' }) );
+Invoice.render(
+{
+    foo: 'jozo',
+    items: 
+    [
+        { name: 'A', value: 3.34 },
+        { name: 'B', value: 19.28 }
+    ]
+});
 
 /**/
 
