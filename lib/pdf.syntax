@@ -28,5 +28,7 @@
     "<" name=/[a-z#][a-z0-9_:-]*/ ?:ws attributes=?...[:ws]:attribute ?:ws ">" =:nodes "</" $name ">"
     "<" name=/[a-z#][a-z0-9_:-]*/ ?:ws attributes=?...[:ws]:attribute ?:ws "/>"
 
+    $ => ( $.attributes = $.attributes.reduce(( aa, a ) => ( aa[a.name] = a.value, aa ), {}), $ )
+
 :main
 	=:nodes

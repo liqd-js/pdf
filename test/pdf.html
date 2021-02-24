@@ -10,21 +10,26 @@
         }
     </header>
     <main>
-        Toto je { foo }
-        <p style="margin:20px; backg">
-            Hola hej
-        </p>
-        Pokracujeme
-        for( let i = 0; i < 10; ++i )
-        {
-            for( let item of items )
+        Podme
+        <span style="font-size:16px">skusit</span> { foo } <b>poriadny</b>
+        <a href="https://www.sme.sk">odstavec <i>ze vidime</i></a> jak to <u>jede</u>
+        <span style="color: red">bomby!!!</span><code>function test()</code>
+        <div>
+            <p style="margin:20px; background: red;">
+                Hola hej
+            </p>
+            Pokracujeme
+            for( let i = 0; i < 10; ++i )
             {
-                <>
-                    { item.name } : { item.value }
-                </>
+                for( let item of items )
+                {
+                    <>
+                        { item.name } : { item.value }
+                    </>
+                }
+                <>-----</>
             }
-            <>-----</>
-        }
+        </div>
     </main>
     <footer>Strana { page } / { pages }</footer>
 </pdf>
