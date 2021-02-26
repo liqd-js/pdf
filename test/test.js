@@ -7,11 +7,11 @@ const Invoice = new PDF( require('fs').readFileSync( __dirname + '/pdf.html', 'u
 
 Invoice.render(
 {
-    foo: 'jozo',
+    no: '200012341',
     items: 
     [
-        { name: 'A', value: 3.34 },
-        { name: 'B', value: 19.28 }
+        { quantity: 1, name: 'Prvy item', price: 3.34 },
+        { quantity: 5, name: 'Druhy item', price: 19.28 }
     ]
 });
 
