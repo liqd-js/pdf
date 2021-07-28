@@ -7,25 +7,25 @@
             Faktúra { no }
         </p>
     </header>
-    <main>
+    <main style="color:blue;">
         <div style="color: red;background-color: #6A9D1B;margin-left: -30px;padding-left: 30px;margin-right: -30px;padding-right: 30px;padding-top:10px;padding-bottom:10px;">
             Čiastka k úhrade
-            <p style="font-size: 32px; font-weight: bold">5 785 €</p>
+            <p style="font-size: 32px; font-weight: bold">{ price } €</p>
         </div>
         <div style="margin-bottom: 60px; background-color: #666;margin-left: -30px;padding-left: 30px;margin-right: -30px;padding-right: 30px;padding-top:10px;padding-bottom:10px;">
             <p style="margin-bottom: 20px;"><b>Odberateľ:</b></p>
-            <p style="font-size: 12px"><b>ACME s.r.o.</b></p>
-            <p>Zamocka 5<br/>881 09 Bratislava<br/>Slovenská republika</p>
+            <p style="font-size: 12px"><b>{ customer.name }</b></p>
+            <p>{ customer.address }<br/>{ customer.zip } { customer.city }<br/>{ customer.country }</p>
         </div>
         for( let item of items )
         {
-            <p>{ item.quantity } ks <span style="color:red">{ item.name }</span> { item.price } €</p>
+            <p>{ item.quantity } ks <span style="color:red">{ item.name }</span>{ item.vat * 100 }% { item.price } €</p>
         }
     </main>
     <footer>
         <p style="margin-bottom: 20px;"><b>Dodávateľ:</b></p>
-        <p style="font-size: 12px"><b>LUCULLUS s.r.o.</b></p>
-        <p>Pribinova 4<br/>881 09 Bratislava<br/>Slovenská republika</p>
+        <p style="font-size: 12px"><b>{ seller.name }</b></p>
+        <p>{ seller.address }<br/>{ seller.zip } { seller.city }<br/>{ seller.country }</p>
         <p style="font-size: 8px; color: #999; margin-top: 6px;">Spoločnosť je zapísaná v obchodnom registri okresného súdu Bratislava I, vložka 32203/B</p>
         <p style="text-align: center;margin-top:20px; font-size: 8px; color: #333;">Strana { $page }</p>
     </footer>
