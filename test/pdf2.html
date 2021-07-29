@@ -2,7 +2,25 @@
     <header>
         Header
     </header>
-    <main>
+    <main style="margin-left: 30px;">
+        <table>
+            <tr>
+                <td colspan="2" style="border-top-width:2px;border-right-width:2px;border-bottom-width:2px;border-left-width:2px;text-align: center;">
+                    Raz
+                </td>
+                <td style="border-top-width:2px;border-right-width:2px;border-bottom-width:2px;border-left-width:2px;text-align: center;">
+                    Dva
+                </td>
+            </tr>
+            <tr>
+                <td style="border-top-width:2px;border-right-width:2px;border-bottom-width:2px;border-left-width:2px;text-align: center;">
+                    tri
+                </td>
+                <td colspan="2" style="border-top-width:2px;border-right-width:2px;border-bottom-width:2px;border-left-width:2px;text-align: center;">
+                    styri
+                </td>
+            </tr>
+        </table>
         <p style="text-align: right;background-color: lightskyblue;padding-top:20px;padding-bottom:20px;padding-left:10px;margin-top:5px;border-right-width:10px;border-top-width:5px;border-left-width:1px;border-bottom-width:20px;">
             Lorem ipsum dolor <b style="font-sizes:50px;">sit</b> amet, consectetur adipiscing elit. <b>Donec</b> eget diam mauris. Cras pellentesque suscipit luctus. 
             Cras velit augue, blandit id massa a, eleifend bibendum enim. Nulla facilisi. Aliquam consectetur libero fermentum, aliquam ante sed, volutpat magna. 
@@ -25,5 +43,5 @@
             Aenean volutpat vestibulum orci ut ornare. Sed ut tellus in sapien accumsan porttitor. Maecenas felis magna, blandit sed turpis a, placerat feugiat ipsum.
         </p>
     </main>
-    <footer>Strana { page } / { pages }</footer>
+    <footer>Strana { $page } / { $pages }</footer>
 </pdf>

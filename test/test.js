@@ -3,7 +3,7 @@
 /**/
 const PDF = require('../lib/pdf');
 //<page> </page>
-const Invoice = new PDF( require('fs').readFileSync( __dirname + '/pdf.html', 'utf8' ));
+const Invoice = new PDF( require('fs').readFileSync( __dirname + '/pdf2.html', 'utf8' ));
 
 const invoice = 
 {
