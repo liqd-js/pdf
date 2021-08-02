@@ -9,20 +9,20 @@
         </p>
     </header>
     <main style="color:black;margin-left:1.2cm;margin-right:1.2cm;margin-top: 1.2cm;margin-bottom: 1.2cm;font-size: 12px;font-weight:light;line-height:1.35em;">
-        <table style="margin-bottom: 4.8mm;">
+        <table style="margin-bottom: 7.2mm;">
             <tr>
                 <td>
-                    HK Green
+                    <img src="images/hk-logo.svg" style="padding-top: 1.7px;" />
                 </td>
-                <td style="text-align: right;">
-                    <span style="font-size:28px;">
+                <td style="text-align: right;line-height: 1.2em;">
+                    <span style="font-size:16px;">
                         Zálohová faktúra<br/>
-                        <b style="font-size:16px;">{ no }</b>
+                        <b style="font-size: 18px;">{ no }</b>
                     </span>
                 </td>
             </tr>
-        </table>
-        /*<table style="margin-bottom: 4.8mm;">
+        </table>/**/
+        <table style="margin-bottom: 4.8mm;">
             <tr style="font-size:8px;color:#666;">
                 <td colspan="2" style="padding-top:4.8mm;padding-bottom:1mm;font-weight: medium;">
                     DODÁVATEĽ:
@@ -103,12 +103,12 @@
                     <td style="padding-left:4.8mm;">
                         Číslo účtu:
                     </td>
-                    <td style="padding-left:4.8mm;text-align: right;">
+                    <td style="padding-left:4.8mm;padding-right:4.8mm;text-align: right;">
                         { seller.banks[0].account }
                     </td>
-                    /*<td rowspan="5">
-                        Test
-                    </td>* /
+                    <td rowspan="5" style="padding-left:4.8mm;">
+                        <img src="images/qr.svg" style="padding-top: 1.7px;" />
+                    </td>
                 </tr>
                 <tr>
                     <td>
@@ -120,7 +120,7 @@
                     <td style="padding-left:4.8mm;">
                         <b>Variabilný symbol:</b>
                     </td>
-                    <td style="padding-left:4.8mm;text-align: right;">
+                    <td style="padding-left:4.8mm;padding-right:4.8mm;text-align: right;">
                         <b>{ reference }</b>
                     </td>
                 </tr>
@@ -134,7 +134,7 @@
                     <td style="padding-left:4.8mm;">
                         <b>IBAN:</b>
                     </td>
-                    <td style="padding-left:4.8mm;text-align: right;margin-left:-2cm;">
+                    <td style="padding-left:4.8mm;padding-right:4.8mm;text-align: right;margin-left:-4cm;">
                         <b>{ seller.banks[0].iban.replace(/(.{4})/g, '$1 ') }</b>
                     </td>
                 </tr>
@@ -148,7 +148,7 @@
                     <td style="padding-left:4.8mm;">
                         BIC/SWIFT:
                     </td>
-                    <td style="padding-left:4.8mm;text-align: right;">
+                    <td style="padding-left:4.8mm;padding-right:4.8mm;text-align: right;">
                         { seller.banks[0].swift }
                     </td>
                 </tr>
@@ -160,9 +160,9 @@
                         prevodom na účet
                     </td>
                     <td style="padding-top:4.8mm;padding-left:4.8mm;font-weight:bold;vertical-align:bottom;padding-bottom:3.2px;">
-                        Čiastka k úhrade
+                        Čiastka k úhrade:
                     </td>
-                    <td style="padding-top:4.8mm;padding-left:4.8mm;font-size:22px;font-weight:bold;text-align: right;">{ price.toFixed(2) } €</td>
+                    <td style="padding-top:4.8mm;padding-left:4.8mm;padding-right:4.8mm;font-size:22px;font-weight:bold;text-align: right;">{ price.toFixed(2) } €</td>
                 </tr>
             </table>
         </div>
@@ -200,8 +200,7 @@
         </table>
         <div style="margin-left: -1.2cm;margin-right: -1.2cm;text-align: center;margin-top:2cm;background-color: #555;padding-top:2mm;padding-bottom:2mm;color:white;">
             info@hk-green.sk +421 222 000 27   1/1
-        </div>
-        */
+        </div>/**/
     </main>
     <footer>
         <p style="margin-bottom: 20px;"><b>Dodávateľ:</b></p>
