@@ -9,8 +9,8 @@ const invoice =
 {
     "type": "invoice",
     "no": "12100000004",
-    "issued": 1613636626,
-    "due": 1613895826,
+    "issued": new Date(),
+    "due": new Date(),
     "reference": "21000003",
     "price": 95.7,
     "currency": "EUR",
@@ -78,7 +78,7 @@ const invoice =
     }],
 }
 
-Invoice.render( invoice );
+Invoice.render( invoice, { locale: 'sk' });
 
 /**/
 

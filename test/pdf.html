@@ -9,6 +9,41 @@
         </p>
     </header>
     <main style="color:black;margin-left:1.2cm;margin-right:1.2cm;margin-top: 1.2cm;margin-bottom: 1.2cm;font-size: 12px;font-weight:light;line-height:1.35em;">
+        {
+            function round( number, precision )
+            {
+                return Math.round( number * Math.pow( 10, precision )) /  Math.pow( 10, precision );
+            }
+
+            function format_price( number, precision, style )
+            {
+                let price = number.toLocaleString( $locale, { style: 'currency', currency, ...( precision !== undefined ? { minimumFractionDigits: precision, maximumFractionDigits: precision } : undefined ) });
+
+                if( style )
+                {
+                    price = price.replace(/(-?[0-9\s.,]+)/, '<span style="' + style +  '">$1</span>' );
+                }
+
+                return price;
+            }
+
+            function format_number( number, precision, style )
+            {
+                number = number.toLocaleString( $locale, { ...( precision !== undefined ? { minimumFractionDigits: precision, maximumFractionDigits: precision } : undefined ) });
+
+                if( style )
+                {
+                    number = '<span style="' + style +  '">' + number + '</span>';
+                }
+
+                return number;
+            }
+
+            function format_date( date )
+            {
+                return date.toLocaleDateString( $locale, { year: 'numeric', month: 'numeric', day: 'numeric' });
+            }
+        }
         <table style="margin-bottom: 7.2mm;">
             <tr>
                 <td>
@@ -43,42 +78,38 @@
                 <td>
                     { seller.address }
                 </td>
-                <td>
-                    IČO: { seller.crn }
+                <td rowspan="3">
+                    <table>
+                        <tr><td style="width:30%;text-align: right;padding-right:2mm;">IČO:</td><td style="width:80%">{ seller.crn }</td></tr>
+                        <tr><td style="width:30%;text-align: right;padding-right:2mm;">DIČ:</td><td style="width:80%">{ seller.tax }</td></tr>
+                        <tr><td style="width:30%;text-align: right;padding-right:2mm;">IČ DPH:</td><td style="width:80%">{ seller.vat }</td></tr>
+                    </table>
                 </td>
                 <td style="padding-left:4.8mm;background-color:#f0f0f0;margin-right:-1.2cm;">
                     { customer.address }
                 </td>
-                <td style="padding-left:4.8mm;background-color:#f0f0f0;margin-right:-1.2cm;">
-                    if( customer.crn ){ <>IČO: { customer.crn }</> }
+                <td rowspan="3" style="padding-left:4.8mm;background-color:#f0f0f0;margin-right:-1.2cm;">
+                    <table>
+                        <tr><td style="width:30%;text-align: right;padding-right:2mm;background-color:#f0f0f0;">IČO:</td><td style="background-color:#f0f0f0;width:80%">TODO { seller.crn }</td></tr>
+                        <tr><td style="width:30%;text-align: right;padding-right:2mm;background-color:#f0f0f0;">DIČ:</td><td style="background-color:#f0f0f0;width:80%">{ seller.tax }</td></tr>
+                        <tr><td style="width:30%;text-align: right;padding-right:2mm;background-color:#f0f0f0;">IČ DPH:</td><td style="background-color:#f0f0f0;width:80%">{ seller.vat }</td></tr>
+                    </table>
                 </td>
             </tr>
             <tr style="line-height: 1.25em;">
                 <td>
                     { seller.zip } { seller.city }
                 </td>
-                <td>
-                    DIČ: { seller.tax }
-                </td>
                 <td style="padding-left:4.8mm;background-color:#f0f0f0;margin-right:-1.2cm;">
                     { customer.zip } { seller.city }
-                </td>
-                <td style="padding-left:4.8mm;background-color:#f0f0f0;margin-right:-1.2cm;">
-                    if( customer.tax ){ <>DIČ: { customer.tax }</> }
                 </td>
             </tr>
             <tr style="line-height: 1.25em;">
                 <td>
                     { { "SK": "Slovensko" }[seller.country] }
                 </td>
-                <td>
-                    IČ DPH: { seller.vat }
-                </td>
                 <td style="padding-left:4.8mm;background-color:#f0f0f0;margin-right:-1.2cm;">
                     { { "SK": "Slovensko" }[customer.country] }
-                </td>
-                <td style="padding-left:4.8mm;background-color:#f0f0f0;margin-right:-1.2cm;">
-                    if( customer.vat ){ <>IČ DPH: { customer.vat }</> }
                 </td>
             </tr>
             <tr style="font-size:9px;">
@@ -98,7 +129,7 @@
                         Dátum vystavenia:
                     </td>
                     <td style="text-align: right;padding-right:4.8mm;">
-                        19.3.2021
+                        { format_date( issued )}
                     </td>
                     <td style="padding-left:4.8mm;">
                         Číslo účtu:
@@ -112,10 +143,10 @@
                 </tr>
                 <tr>
                     <td>
-                        Dátum zdaniteľného plnenia:
+                        <b>Dátum splatnosti:</b>
                     </td>
                     <td style="text-align: right;padding-right:4.8mm;">
-                        19.3.2021
+                        <b>{ format_date( due )}</b>
                     </td>
                     <td style="padding-left:4.8mm;">
                         <b>Variabilný symbol:</b>
@@ -126,10 +157,10 @@
                 </tr>
                 <tr>
                     <td>
-                        <b>Dátum splatnosti:</b>
+                        Dátum dodania:
                     </td>
                     <td style="text-align: right;padding-right:4.8mm;">
-                        <b>19.3.2021</b>
+                        { format_date( issued )}
                     </td>
                     <td style="padding-left:4.8mm;">
                         <b>IBAN:</b>
@@ -140,10 +171,8 @@
                 </tr>
                 <tr>
                     <td>
-                        Dátum dodania tovaru:
                     </td>
                     <td style="text-align: right;padding-right:4.8mm;">
-                        19.3.2021
                     </td>
                     <td style="padding-left:4.8mm;">
                         BIC/SWIFT:
@@ -162,43 +191,98 @@
                     <td style="padding-top:4.8mm;padding-left:4.8mm;font-weight:bold;vertical-align:bottom;padding-bottom:3.2px;">
                         Čiastka k úhrade:
                     </td>
-                    <td style="padding-top:4.8mm;padding-left:4.8mm;padding-right:4.8mm;font-size:22px;font-weight:bold;text-align: right;">{ price.toFixed(2) } €</td>
+                    <td style="padding-top:4.8mm;padding-left:4.8mm;padding-right:4.8mm;font-size:22px;text-align: right;">#{ format_price( price, 2, 'font-weight:bold' )}</td>
                 </tr>
             </table>
         </div>
-        <table>
+        <table style="margin-bottom: 7.2mm;">
             <tr style="font-size:8px;color:#666;font-weight: medium;">
-                <td style="border-bottom-width:0.5px;border-bottom-color:#000;padding-bottom: 1.2mm;"></td>
-                <td style="padding-bottom: 1.2mm;border-bottom-width:0.5px;border-bottom-color:#000;">NÁZOV POLOŽKY</td>
-                <td style="padding-left: 1.65mm;padding-bottom: 1.2mm;border-bottom-width:0.5px;border-bottom-color:#000;">KÓD</td>
-                <td style="padding-right: 1.65mm;padding-bottom: 1.2mm;text-align: right;border-bottom-width:0.5px;border-bottom-color:#000;">MNOŽSTVO</td>
-                <td style="padding-right: 1.65mm;padding-bottom: 1.2mm;text-align: right;border-bottom-width:0.5px;border-bottom-color:#000;">CENA</td>
-                <td style="padding-right: 1.65mm;padding-bottom: 1.2mm;text-align: right;border-bottom-width:0.5px;border-bottom-color:#000;">DPH</td>
-                <td style="padding-bottom: 1.2mm;text-align: right;border-bottom-width:0.5px;border-bottom-color:#000;">CELKOM</td>
+                <td style="border-bottom-width:0.5px;border-bottom-color:#000;padding-bottom: 1.2mm;width:3%;"></td>
+                <td style="padding-bottom: 1.2mm;border-bottom-width:0.5px;border-bottom-color:#000;width:39%;">NÁZOV POLOŽKY</td>
+                <td style="padding-bottom: 1.2mm;border-bottom-width:0.5px;border-bottom-color:#000;width:8%;text-align:center;">KÓD</td>
+                <td style="padding-right: 1.65mm;padding-bottom: 1.2mm;text-align: right;border-bottom-width:0.5px;border-bottom-color:#000;width:10%;">MNOŽSTVO</td>
+                <td style="padding-right: 1.65mm;padding-bottom: 1.2mm;text-align: right;border-bottom-width:0.5px;border-bottom-color:#000;width:16%;">CENA ZA KUS</td>
+                <td style="padding-bottom: 1.2mm;text-align: center;border-bottom-width:0.5px;border-bottom-color:#000;width:6%;">DPH</td>
+                <td style="padding-bottom: 1.2mm;text-align: right;border-bottom-width:0.5px;border-bottom-color:#000;width:18%;">CELKOM S DPH</td>
             </tr>
             for( let i = 0; i < items.length; ++i )
             {
                 let item = items[i];
-                let price_no_vat = item.price / ( 1 + item.vat );
 
                 <tr>
-                    <td style="padding-top: 1.2mm;padding-bottom: 1.2mm;">{ i + 1 }.</td>
-                    <td style="border-right-width:0.5px;padding-top: 1.2mm;padding-bottom: 1.2mm;padding-right:1.6mm;font-weight: medium;line-height:1.25em;">{ item.name }</td>
-                    <td style="border-right-width:0.5px;padding-left:1.6mm;padding-top: 1.2mm;padding-bottom: 1.2mm;">{ item.uid }</td>
-                    <td style="border-right-width:0.5px;padding-right:1.6mm;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;"><span style="font-weight: medium;">{ item.quantity }</span> ks</td>
-                    <td style="border-right-width:0.5px;padding-right:1.6mm;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;"><span style="font-weight: medium;">{ price_no_vat.toFixed(2) }</span> €</td>
-                    <td style="border-right-width:0.5px;padding-right:1.6mm;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;">{ item.vat * 100 } %</td>
-                    <td style="padding-left:1.6mm;padding-top: 1.2mm;padding-bottom:1.2mm;text-align: right;"><b>{ ( item.quantity * item.price ).toFixed(2) }</b> €</td>
+                    <td style="padding-top: 1.2mm;padding-bottom: 1.2mm;width:3%;">{ i + 1 }.</td>
+                    <td style="border-right-width:0.5px;padding-top: 1.2mm;padding-bottom: 1.2mm;padding-right:1.6mm;font-weight: medium;line-height:1.25em;width:39%;">{ item.name }</td>
+                    <td style="border-right-width:0.5px;padding-top: 1.2mm;padding-bottom: 1.2mm;width:8%;text-align:center;">{ item.uid }</td>
+                    <td style="border-right-width:0.5px;padding-right:1.6mm;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:10%;">#{ format_number( item.quantity, undefined, 'font-weight: medium;' )} ks</td>
+                    <td style="border-right-width:0.5px;padding-right:1.6mm;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:16%;">
+                        #{ format_price( item.price / ( 1 + item.vat ), 2, 'font-weight:medium' )}
+                    </td>
+                    <td style="border-right-width:0.5px;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: center;width:6%;">{ item.vat * 100 } %</td>
+                    <td style="padding-left:1.6mm;padding-top: 1.2mm;padding-bottom:1.2mm;text-align: right;width:18%;">#{ format_price( item.quantity * item.price, 2, 'font-weight:bold' )}</td>
                 </tr>
             }
         </table>
-        <table style="margin-left: 10cm;">
+        <table>
             <tr>
-                <td style="text-align: right;font-weight: medium;font-size:18px;">Celkom</td>
-                <td style="text-align: right;font-size:22px;"><b>{ price.toFixed(2) }</b> €</td>
+                <td style="width:50%">
+                {
+                    let vats = {};
+                    let tax = 0;
+
+                    for( let item of items )
+                    {
+                        vats[ item.vat * 100 ] = ( vats[ item.vat * 100 ] || 0 ) + round( item.price * item.quantity, 2 );
+                    }
+
+                    <table>
+                        <tr style="font-size:8px;color:#666;font-weight: medium;">
+                            <td style="border-bottom-width:0.5px;border-bottom-color:#000;padding-bottom: 1.2mm;width:20%"></td>
+                            <td style="border-bottom-width:0.5px;border-bottom-color:#000;padding-bottom: 1.2mm;text-align: right;width:28%">ZÁKLAD</td>
+                            <td style="border-bottom-width:0.5px;border-bottom-color:#000;padding-bottom: 1.2mm;text-align: right;width:24%">DPH</td>
+                            <td style="border-bottom-width:0.5px;border-bottom-color:#000;padding-bottom: 1.2mm;text-align: right;width:28%">CELKOM</td>
+                        </tr>
+                        for( let vat in vats )
+                        {
+                            tax += round( vats[vat], 2 ) - round( round( vats[vat], 2 ) / ( 1 + vat / 100 ), 4 );
+
+                            <tr>
+                                <td style="padding-top: 1.2mm;padding-bottom: 1.2mm;width:22%">DPH { vat } %</td>
+                                <td style="padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:27%">
+                                    #{ format_number( round( round( vats[vat], 2 ) / ( 1 + vat / 100 ), 4 ), 2 ) }
+                                </td>
+                                <td style="padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:24%">
+                                    #{ format_number( round( vats[vat], 2 ) - round( round( vats[vat], 2 ) / ( 1 + vat / 100 ), 4 ), 2 ) }
+                                </td>
+                                <td style="padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:27%">#{ format_number( vats[vat], 2 ) }</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td style="border-top-width:0.5px;border-top-color:#000;padding-top: 1.2mm;padding-bottom: 1.2mm;width:22%"><span style="font-weight: medium;">Celkom</span></td>
+                            <td style="border-top-width:0.5px;border-top-color:#000;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:27%">
+                                #{ format_number( price - tax, 2, 'font-weight: medium;' )}
+                            </td>
+                            <td style="border-top-width:0.5px;border-top-color:#000;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:24%">
+                                #{ format_number( tax, 2, 'font-weight: medium;' )}
+                            </td>
+                            <td style="border-top-width:0.5px;border-top-color:#000;padding-top: 1.2mm;padding-bottom: 1.2mm;text-align: right;width:27%">#{ format_number( price, 2, 'font-weight: medium;' )}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4"><div style="margin-top:2.4mm">Rozpis DPH uvedený v mene { currency }</div></td>
+                        </tr>
+                    </table>
+                }
+                </td>
+                <td style="width:50%">
+                    <table>
+                        <tr>
+                            <td style="text-align: right;font-weight: medium;font-size:18px;padding-top:1mm;">Celkom</td>
+                            <td style="text-align: right;font-size:22px;">#{ format_price( price, 2, 'font-weight:bold' ) }</td>
+                        </tr>
+                    </table>
+                </td>
             </tr>
         </table>
-        <div style="margin-left: -1.2cm;margin-right: -1.2cm;text-align: center;margin-top:2cm;background-color: #555;padding-top:2mm;padding-bottom:2mm;color:white;">
+        <div style="margin-left: -1.2cm;margin-right: -1.2cm;text-align: center;margin-top:10.8cm;background-color: #555;padding-top:2mm;padding-bottom:2mm;color:white;">
             info@hk-green.sk +421 222 000 27   1/1
         </div>/**/
     </main>
