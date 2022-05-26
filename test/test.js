@@ -3,7 +3,7 @@
 /**/
 const PDF = require('../lib/pdf');
 //<page> </page>
-const Invoice = new PDF( require('fs').readFileSync( __dirname + '/pdf.html', 'utf8' ));
+const Invoice = new PDF( require('fs').readFileSync( __dirname + '/invoice.html', 'utf8' ));
 
 const invoice = 
 {
@@ -37,7 +37,7 @@ const invoice =
             "swift": "SUBASKBX"
         }]
     },
-    "customer": {
+    "buyer": {
         "name": "Robert Hozza",
         "address": "Uherová 15",
         "zip": "05801",
@@ -76,9 +76,14 @@ const invoice =
         "discount": 0,
         "vat": 0.2
     }],
+    vat: true,
+    account: { _id: 'SK1231231231', prefix: '0000', number: '231232131', suffix: '2312321' },
+    qr: undefined,
+    payment: { type: 'cod' },
+    note: 'spolocnost zapisana'
 }
 
-Invoice.render( invoice, { locale: 'sk' });
+Invoice.render( invoice, { locale: 'sk' }, __dirname + '/invoice.pdf' );
 
 /**/
 
