@@ -80,7 +80,9 @@ const invoice =
     account: { _id: 'SK1231231231', prefix: '0000', number: '231232131', suffix: '2312321' },
     qr: undefined,
     payment: { type: 'cod' },
-    note: 'spolocnost zapisana'
+    note: 'spolocnost zapisana',
+    logo: __dirname + '/logo-3.png',
+    _id: 1,
 }
 
 Invoice.render( invoice, { locale: 'sk' }, __dirname + '/invoice.pdf' );
