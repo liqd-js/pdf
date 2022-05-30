@@ -1,13 +1,14 @@
 {
   "name": "@liqd-js/pdf",
   "description": "PDF rendering engine",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "author": "radixxko",
   "license": "MIT",
   "main": "lib/pdf.js",
   "homepage": "https://liqd-js.com/lib/template",
   "files": [
-    "lib/", "test/"
+    "lib/",
+    "test/"
   ],
   "scripts": {
     "test": "nyc mocha",
@@ -25,7 +26,7 @@
   ],
   "dependencies": {
     "@liqd-js/parser": "^1.0.0",
-    "@liqd-js/template": "^0.9.1",
+    "@liqd-js/template": "^0.9.2",
     "pdfkit": "^0.13.0",
     "svg-to-pdfkit": "^0.1.8"
   }
