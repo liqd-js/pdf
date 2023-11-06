@@ -1,7 +1,7 @@
 {
   "name": "@liqd-js/pdf",
   "description": "PDF rendering engine",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "radixxko",
   "license": "MIT",
   "main": "lib/pdf.js",
