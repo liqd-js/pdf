@@ -1,0 +1,36 @@
+:ws
+    =/[\s\n]+/
+
+:string
+	=/"(?<string>([^\\"\r\n]|\\[^\r\n])*?)"/
+	=/'(?<string>([^\\'\r\n]|\\[^\r\n])*?)'/
+
+	$ => Util.unescape( $.string )
+
+:attribute
+	name=/[a-zA-Z_][a-zA-Z0-9_:-]*/ "=" value=:string
+	name=/[a-zA-Z_][a-zA-Z0-9_:-]*/
+
+:header
+    "<header" ?:ws attributes=?...[:ws]:attribute ?:ws ">" template=/[\s\S]*?(?=<\/header>)/ "</header>"
+
+:footer
+    "<footer" ?:ws attributes=?...[:ws]:attribute ?:ws ">" template=/[\s\S]*?(?=<\/footer>)/ "</footer>"
+
+:main
+    "<main" ?:ws attributes=?...[:ws]:attribute ?:ws ">" template=/[\s\S]*?(?=<\/main>)/ "</main>"
+
+:helpers
+    =/<helpers>[\s\n]*(?<code>[\s\S]*?)[\s\n]*<\/helpers>/
+
+    $ => $.code
+
+:blocks
+=:helpers
+    header=:header
+    footer=:footer
+    main=:main
+    helpers=:helpers
+
+:main
+    "<pdf" ?:ws attributes=?...[:ws]:attribute ?:ws ">" ?:ws blocks=...[:ws]:blocks ?:ws "</pdf>"

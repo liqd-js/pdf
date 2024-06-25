@@ -1,8 +1,14 @@
 <pdf>
+    <template>
+        <page first style="background:red; margin: 10; padding: 10"/>
+        <page style="background:green; margin: 10; padding: 10"/>
+        <page last style="background:brown; margin: 10; padding: 10"/>
+    </template>
     <header>
         Header
     </header>
     <main style="margin-left: 30px;margin-right: 10px;">
+        <page>
         <table>
             <tr>
                 <td colspan="2" style="border-top-width:2px;border-right-width:2px;border-bottom-width:2px;border-left-width:2px;text-align: center;">
@@ -21,6 +27,7 @@
                 </td>
             </tr>
         </table>
+        <page>
         <p style="text-align: right;background-color: lightskyblue;padding-top:20px;padding-bottom:20px;padding-left:10px;margin-top:5px;border-right-width:10px;border-top-width:5px;border-left-width:1px;border-bottom-width:20px;">
             Lorem ipsum dolor <b style="font-sizes:50px;">sit</b> amet, consectetur adipiscing elit. <b>Donec</b> eget diam mauris. Cras pellentesque suscipit luctus. 
             Cras velit augue, blandit id massa a, eleifend bibendum enim. Nulla facilisi. Aliquam consectetur libero fermentum, aliquam ante sed, volutpat magna. 
