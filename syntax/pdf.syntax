@@ -1,0 +1,37 @@
+:ws
+    =/[\s\n]+/
+
+:string
+	=/"(?<string>([^\\"\r\n]|\\[^\r\n])*?)"/
+	=/'(?<string>([^\\'\r\n]|\\[^\r\n])*?)'/
+
+	$ => Util.unescape( $.string )
+
+:attribute
+	name=/[a-zA-Z_][a-zA-Z0-9_:-]*/ "=" value=:string
+	name=/[a-zA-Z_][a-zA-Z0-9_:-]*/
+
+:node
+    "<" name=/i18n/ ?:ws attributes=?...[:ws]:attribute ?:ws ">" source=/(.|\n)*?(?=<\/i18n>)/ "</i18n>"
+    "<" name=/theme/ ?:ws attributes=?...[:ws]:attribute ?:ws ">" source=/(.|\n)*?(?=<\/theme>)/ "</theme>"
+
+    $ => ( $.attributes = $.attributes.reduce(( aa, a ) => ( aa[a.name] = a.value, aa ), {}), $ )
+
+:top_node
+    ?:ws "<" name="style" ">" source=/(.|\n)*?(?=<\/style>)/ "</style>"
+    ?:ws "<" name="header" ?:ws attributes=?...[:ws]:attribute ?:ws ">" source=/(.|\n)*?(?=<\/header>)/ "</header>"
+    ?:ws "<" name="footer" ?:ws attributes=?...[:ws]:attribute ?:ws ">" source=/(.|\n)*?(?=<\/footer>)/ "</footer>"
+    ?:ws "<" name="theme" ?:ws attributes=?...[:ws]:attribute ?:ws ">" source=/(.|\n)*?(?=<\/theme>)/ "</theme>"
+    ?:ws "<" name="main" ?:ws attributes=?...[:ws]:attribute ?:ws ">" source=/(.|\n)*?(?=<\/main>)/ "</main>"
+
+    $ => ( $.attributes && ( $.attributes = $.attributes.reduce(( aa, a ) => ( aa[a.name] = a.value, aa ), {}), $ ))
+
+:nodes
+    nodes=?...[:ws]:node
+
+    $ => $.nodes
+
+:main
+    ?:ws "<pdf" ?:ws attributes=?...[:ws]:attribute ?:ws ">" nodes=?...:top_node ?:ws "</pdf>" ?:ws
+
+    $ => ( $.attributes = $.attributes.reduce(( aa, a ) => ( aa[a.name] = a.value, aa ), {}), $ )

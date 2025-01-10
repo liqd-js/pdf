@@ -1,7 +1,7 @@
 {
   "name": "@liqd-js/pdf",
   "description": "PDF rendering engine",
-  "version": "0.3.0-custom.1",
+  "version": "1.0.0-alpha.1",
   "author": "radixxko",
   "license": "MIT",
   "main": "lib/pdf.js",
@@ -26,8 +26,13 @@
   ],
   "dependencies": {
     "@liqd-js/parser": "^1.0.0",
-    "@liqd-js/template": "^0.9.10",
-    "pdfkit": "^0.13.0",
+    "@liqd-js/template": "^0.9.11",
+    "pdfkit": "^0.15.0",
     "svg-to-pdfkit": "^0.1.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.2",
+    "@types/pdfkit": "^0.13.4",
+    "typescript": "^5.5.4"
   }
 }

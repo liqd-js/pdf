@@ -1,0 +1,4 @@
+<pdf size="A4" title={$props.title}>
+    <i18n> janko </i18n>
+    <theme> hrasko </theme>
+</pdf>

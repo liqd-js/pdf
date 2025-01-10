@@ -1,0 +1,11 @@
+<pdf size="A4" layout="portrait" title={$props.title}>
+    <style>
+        h1{ color: red; }
+    </style>
+    <theme style="background-color:red;"></theme>
+    <header> janko </header>
+    <footer> hrasko </footer>
+    <main>
+        <h1>Test</h1>  
+    </main>
+</pdf>
