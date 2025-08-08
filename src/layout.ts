@@ -26,8 +26,7 @@ export default class Layout
 
         let width = this.document.page.width; // TODO this.document.width;
 
-        const a = this.compile( nodes, style );
-        this.elements = a.map( n =>
+        this.elements = this.compile( nodes, style ).map( n =>
         {
             if( n.type === 'block' )
             {
@@ -134,7 +133,10 @@ export default class Layout
                 {
                     if( cell.tag )
                     {
-                        let cell_style = row_style.inherit().apply( style.default( row.tag.name )).apply( cell.tag.attributes.style );
+                        let cell_style = row_style.inherit()
+                            .apply( style.default( row.tag.name ))
+                            // TODO: apply <style> for correct path
+                            .apply( cell.tag.attributes.style );
 
                         compiled.push(
                         {
