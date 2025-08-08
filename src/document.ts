@@ -70,6 +70,8 @@ export default class Document
 
         let headerHeight = 0;
 
+        console.dir( this.pdf.main.nodes, { depth: null });
+
 
         if( this.pdf.header )
         {
