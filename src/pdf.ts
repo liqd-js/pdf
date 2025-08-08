@@ -1,41 +1,75 @@
-import fs from 'fs';
-import PDFDocument from 'pdfkit';
+// TODO cropbox na pdf nastavovat
 
+import fs from 'fs';
+import Document from './document';
+import { Element, Block } from './elements';
+import PDFKit from 'pdfkit';
+import PDFDocument = PDFKit.PDFDocument;
 const Parser = require('@liqd-js/parser');
 const Template = require('@liqd-js/template');
-const PDFParser = new Parser( __dirname + '/../syntax/pdf.syntax' );
+const PDFParser = new Parser( __dirname + '/pdf.syntax' );
+const SVGtoPDF = require('svg-to-pdfkit');
 
-const template = new Template({ directories: [ __dirname + '/../syntax' ]});
+PDFKit.prototype.addSVG = function( svg: string, x: number, y: number, options )
+{
+    return SVGtoPDF(this, svg, x, y, options), this;
+};
+export type LiqdPDFDocument = PDFDocument & {
+    addSVG: ( svg: string, x: number, y: number, options?: any ) => LiqdPDFDocument
+    _fontSize: number
+}
+
+const Load = ( filename: string ) => fs.readFileSync( filename, 'utf8' );
+const Compile = ( template: any, source: string ) => template.compile( `if( true ){ with( $props.data ){ <>${source}</>}}` );
+// TODO: template: type?    ^^^
+
+const HEADER_RE = /<header(\s[^>]+)?>[\s\S]+<\/header>/;
+const FOOTER_RE = /<footer(\s[^>]+)?>[\s\S]+<\/footer>/;
+const MAIN_RE = /<main(\s[^>]+)?>[\s\S]+<\/main>/;
+
+export type PDFOptions = { dictionaries?: object[], locale?: string }
 
 export default class PDF
 {
-    static async render()
+    private readonly template;
+    private readonly main;
+    private readonly header;
+    private readonly footer;
+
+    constructor( template: string, options: PDFOptions )
     {
-        const resolved = ( await template.render( 'testik', { props: { title: 'Janko' }})).replaceAll(/[\s\n]*<style>(.|\n)*?(?=<\/style>)<\/style>[\s\n]*/g, ( _: any, style: string ) =>
+        this.template = new Template({ directories: [], ...options });
+
+        this.template.on( 'error', (e: any) => console.log( e ));
+
+        this.main = MAIN_RE.test( template ) ? Compile( this.template, template.match( MAIN_RE )![0] ) : null;
+        this.header = HEADER_RE.test( template ) ? Compile( this.template, template.match( HEADER_RE )![0] ) : null;
+        this.footer = FOOTER_RE.test( template ) ? Compile( this.template, template.match( FOOTER_RE )![0] ) : null;
+
+        //console.log( this.main, this.header, this.footer );
+
+        //this.templates.content = this.template.compile( content );
+    }
+
+    async render( data: object, options, filename: string, documentOptions )
+    {
+        let main = PDFParser.parse( await this.template.render( this.main, { ...options, props: { ...( options.props || {}), data }}));
+        let header = this.header ? async( props = {}) => PDFParser.parse( await this.template.render( this.header, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
+        let footer = this.footer ? async( props = {}) => PDFParser.parse( await this.template.render( this.footer, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
+
+        let document = new Document({ main, header, footer }, documentOptions );
+
+        await document.render();
+
+        if( filename )
         {
-            return '';
-        });
-
-        console.log( resolved );
-
-        const styles = resolved.replace
-
-        const pdf = PDFParser.parse( resolved );
-
-        console.log( pdf );
-
-        const doc = new PDFDocument({ size: pdf.attributes.size, layout: pdf.attributes.layout, margin: 50 });
-
-        doc.pipe( fs.createWriteStream( __dirname + '/../syntax/final.pdf' ));
-
-        const pageWidth = doc.page.width;
-        const pageHeight = doc.page.height;
-        doc.rect(0, 0, pageWidth, pageHeight).fill('red');
-
-        doc.text( 'Hello world!', 100, 100 );
-
-        doc.end();
+            await document.save( filename );
+        }
+        else
+        {
+            return await document.data();
+        }
     }
 }
 
-PDF.render()//.then( console.log ).catch( console.error );
+export { Element, Block } from './elements';
