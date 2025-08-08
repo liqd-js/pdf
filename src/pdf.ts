@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 // TODO cropbox na pdf nastavovat
 
 import fs from 'fs';

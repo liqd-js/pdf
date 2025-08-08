@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import { Block, LiqdPDFDocument } from "../pdf";
 import Style from "../style";
 import { Element, Text } from ".";

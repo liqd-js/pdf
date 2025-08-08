@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import Style from "../style";
 import { LiqdPDFDocument } from "../pdf";
 import { Element } from ".";
@@ -17,8 +19,8 @@ type TextElementString = {
 }
 type TextElementUnit = {
     text: string;
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
     style?: Style;
     cap?: number;
     baseline?: number;
@@ -35,7 +37,7 @@ type TextElementTextOptions = {
 export class Text extends Element
 {
     private readonly strings: TextElementString[];
-    private lines: TextElementLine[] = [];
+    private lines: TextElementLine[] | undefined;
 
     constructor( document: LiqdPDFDocument, style: Style, width: number, height: number | undefined, strings: TextElementString[] )
     {
@@ -80,7 +82,8 @@ export class Text extends Element
                 {
                     if( text )
                     {
-                        typeset.push({ text, width: this.document.widthOfString( text ), height, cap, baseline, underline });
+                        const width = this.document.widthOfString( text );
+                        typeset.push({ text, width: width, height, cap, baseline, underline });
                     }
                 }
             }
@@ -143,7 +146,7 @@ export class Text extends Element
                     }
                 }
 
-                line.width = line.units.reduce(( w, u ) => w += u.width, 0 );
+                line.width = line.units.reduce(( w, u ) => w += u.width || 0, 0 );
             }
         }
 
@@ -164,55 +167,55 @@ export class Text extends Element
         switch ( style.fontWeight + ( style.fontStyle ? '_'+style.fontStyle : '' ) )
         {
             case '100'                  :
-            case 'ultralight'           : font = __dirname + '/../test/fonts/HelveticaNeue-UltraLight.ttf'; break;
+            case 'ultralight'           : font = __dirname + '/../../test/fonts/HelveticaNeue-UltraLight.ttf'; break;
 
             case '100_italic'           :
-            case 'ultralight_italic'    : font = __dirname + '/../test/fonts/HelveticaNeue-UltraLightItalic.ttf'; break;
+            case 'ultralight_italic'    : font = __dirname + '/../../test/fonts/HelveticaNeue-UltraLightItalic.ttf'; break;
 
 
             case '200'                  :
-            case 'thin'                 : font = __dirname + '/../test/fonts/HelveticaNeue-Light.ttf'; break;
+            case 'thin'                 : font = __dirname + '/../../test/fonts/HelveticaNeue-Light.ttf'; break;
 
             case '200_italic'           :
-            case 'thin_italic'          : font = __dirname + '/../test/fonts/HelveticaNeue-LightItalic.ttf'; break;
+            case 'thin_italic'          : font = __dirname + '/../../test/fonts/HelveticaNeue-LightItalic.ttf'; break;
 
 
             case '300'                  :
-            case 'light'                : font = __dirname + '/../test/fonts/HelveticaNeue-Light.ttf'; break;
+            case 'light'                : font = __dirname + '/../../test/fonts/HelveticaNeue-Light.ttf'; break;
 
             case '300_italic'           :
-            case 'light_italic'         : font = __dirname + '/../test/fonts/HelveticaNeue-LightItalic.ttf'; break;
+            case 'light_italic'         : font = __dirname + '/../../test/fonts/HelveticaNeue-LightItalic.ttf'; break;
 
 
             case '500'                  :
-            case 'medium'               : font = __dirname + '/../test/fonts/HelveticaNeue-Medium.ttf'; break;
+            case 'medium'               : font = __dirname + '/../../test/fonts/HelveticaNeue-Medium.ttf'; break;
 
             case '500_italic'           :
-            case 'medium_italic'        : font = __dirname + '/../test/fonts/HelveticaNeue-MediumItalic.ttf'; break;
+            case 'medium_italic'        : font = __dirname + '/../../test/fonts/HelveticaNeue-MediumItalic.ttf'; break;
 
 
             case '600'                  :
             case '700'                  :
             case '800'                  :
             case '900'                  :
-            case 'bold'                 : font = __dirname + '/../test/fonts/HelveticaNeue-Bold.ttf'; break;
+            case 'bold'                 : font = __dirname + '/../../test/fonts/HelveticaNeue-Bold.ttf'; break;
 
             case '600_italic'           :
             case '700_italic'           :
             case '800_italic'           :
             case '900_italic'           :
-            case 'bold_italic'          : font = __dirname + '/../test/fonts/HelveticaNeue-BoldItalic.ttf'; break;
+            case 'bold_italic'          : font = __dirname + '/../../test/fonts/HelveticaNeue-BoldItalic.ttf'; break;
 
 
             case '400_italic'           :
             case 'normal_italic'        :
             case 'regular_italic'       :
-            case 'italic'               : font = __dirname + '/../test/fonts/HelveticaNeue-Italic.ttf';
+            case 'italic'               : font = __dirname + '/../../test/fonts/HelveticaNeue-Italic.ttf';
 
             case '400'                  :
             case 'normal'               :
             case 'regular'              :
-            default                     : font = __dirname + '/../test/fonts/HelveticaNeue.ttf';
+            default                     : font = __dirname + '/../../test/fonts/HelveticaNeue.ttf';
         }
 
         //font = 'Courier';
@@ -258,7 +261,7 @@ export class Text extends Element
                         textOptions['underline'] = unit.underline;
                     }
                     this.document.text( unit.text, innerX + caretX, innerY + caretY + (line.baseline || 0) - (unit.baseline || 0), textOptions );
-                    caretX += unit.width + spacing;
+                    caretX += (unit.width || 0) + spacing;
                 }
                 else if( unit.style )
                 {

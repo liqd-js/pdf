@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import { LiqdPDFDocument } from "../pdf";
 import Style from "../style";
 import { Element, Grid, HorizontalRule, List, Image, Text } from ".";

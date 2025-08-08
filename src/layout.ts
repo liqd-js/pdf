@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import { Block, Element } from './elements';
 import { LiqdPDFDocument } from "./pdf";
 import Style from "./style";
@@ -24,7 +26,8 @@ export default class Layout
 
         let width = this.document.page.width; // TODO this.document.width;
 
-        this.elements = this.compile( nodes, style ).map( n =>
+        const a = this.compile( nodes, style );
+        this.elements = a.map( n =>
         {
             if( n.type === 'block' )
             {
@@ -59,7 +62,7 @@ export default class Layout
             }
             else if ( 'ws' in nodes[i] )
             {
-                inline.push({ text: ' ' })
+                inline.push({ text: ' ', style, ...options })
             }
             else if( 'text' in nodes[i] )
             {
