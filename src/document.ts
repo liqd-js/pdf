@@ -1,7 +1,5 @@
 import PDFKit from "pdfkit";
-import fs from "fs";
 import Style from "./style";
-import PDFDocument = PDFKit.PDFDocument;
 import Layout from "./layout";
 import { LiqdPDFDocument } from "./pdf";
 
@@ -21,10 +19,13 @@ export type NodeText = {
 }
 export type NodeWs = { ws: string }
 
+export type StyleSheet = Array<{ selector: string, rules: string }>
+
 type PDF = {
     main: { nodes: Node[] }
     header?: ( props: unknown ) => Promise<{ nodes: Node[] }>;
     footer?: ( props: unknown ) => Promise<{ nodes: Node[] }>;
+    stylesheet?: StyleSheet
 }
 
 export default class Document
@@ -32,13 +33,14 @@ export default class Document
     private pdf: PDF;
     private readonly document: LiqdPDFDocument;
     private readonly style: Style;
+    private readonly stylesheet?: StyleSheet;
     private readonly options?: any;
 
     constructor( pdf: PDF, options?: any )
     {
         this.pdf = pdf;
         this.style = new Style( 'font-size: 10px; text-align: left; color: black; font-family: Helvetica;');
-
+        this.stylesheet = this.pdf.stylesheet || undefined;
 
         this.document = new PDFKit({ size: 'A4', bufferPages: true, autoFirstPage: true, margin: 0 }) as LiqdPDFDocument;
         this.options = options;
@@ -72,20 +74,20 @@ export default class Document
 
         console.dir( this.pdf.main.nodes, { depth: null });
 
-
         if( this.pdf.header )
         {
-            const header = new Layout( this.document, this.style, ( await this.pdf.header({ $page: 1 })).nodes, this.options );
+            const headerNodes = ( await this.pdf.header({ $page: 1 })).nodes;
+            const header = new Layout( this.document, this.style, headerNodes, this.options, this.stylesheet );
             header.render( 0, 0 );
             headerHeight = header.outerHeight
         }
 
-        const layout = new Layout( this.document, this.style, this.pdf.main.nodes, this.options );
+        const layout = new Layout( this.document, this.style, this.pdf.main.nodes, this.options, this.stylesheet );
         layout.render( 0, headerHeight );
 
         if( this.pdf.footer )
         {
-            const footer = new Layout( this.document, this.style, ( await this.pdf.footer({ $page: 1 })).nodes, this.options );
+            const footer = new Layout( this.document, this.style, ( await this.pdf.footer({ $page: 1 })).nodes, this.options, this.stylesheet );
             footer.render( 0, this.document.page.height - footer.outerHeight );
         }
 

@@ -3,8 +3,11 @@
 import { Block, Element } from './elements';
 import { LiqdPDFDocument } from "./pdf";
 import Style from "./style";
-import { ObjectHash } from './helpers';
-import { Node, NodeTag, NodeText } from "./document";
+import { ObjectHash } from './helpers/base';
+import { Node, NodeTag, NodeText, StyleSheet } from "./document";
+import { getMatchingStyle } from "./helpers/style-resolver";
+
+export type NodePath = Array<{ tag: string, ids?: string[], classes?: string[] }>
 
 const INLINE_TAGS = [ 'a', 'b', 'u', 'strong', 'cite', 'code', 'em', 'i', 'q', 'small', 'span', 'sub', 'sup', 'br' ];
 const Equals = ( objA?: object, objB?: object ) =>  objA === objB || ( objA && objB && typeof objA === 'object' && typeof objB === 'object' && ObjectHash( objA ) === ObjectHash( objB ));
@@ -19,14 +22,18 @@ export default class Layout
 {
     private readonly elements: Element[] = [];
 
-    constructor( private document: LiqdPDFDocument, private style: Style, nodes: Node[], options )
+    constructor(
+        private document: LiqdPDFDocument,
+        private style: Style,
+        nodes: Node[], options,
+        private stylesheet?: StyleSheet,
+    )
     {
-        this.document = document;
-        this.style = style;
-
         let width = this.document.page.width; // TODO this.document.width;
 
-        this.elements = this.compile( nodes, style ).map( n =>
+        const x = this.compile( nodes, style, [] );
+
+        this.elements = this.compile( nodes, style, [{tag: 'pdf'}] ).map( n =>
         {
             if( n.type === 'block' )
             {
@@ -34,10 +41,24 @@ export default class Layout
             }
         });
 
-        //console.log( require('util').inspect( this.elements, { colors: true, depth: Infinity }));
+        console.log( require('util').inspect( this.elements, { colors: true, depth: Infinity }));
     }
 
-    private compile_inline( inline: InlineElement[], nodes: Node[], style: Style, options, i = 0 )
+    get outerHeight()
+    {
+        return this.elements.reduce(( h, e ) => h += e.outerHeight, 0 ); // TODO margin padding
+    }
+
+    render( x: number, y: number )
+    {
+        for( let element of this.elements )
+        {
+            element.render( x, y );
+            y += y.outerHeight;
+        }
+    }
+
+    private compile_inline( inline: InlineElement[], nodes: Node[], style: Style, options, i = 0, path: NodePath = [] )
     {
         for( ; i < nodes.length; ++i )
         {
@@ -52,7 +73,14 @@ export default class Layout
                 }
                 else
                 {
-                    let node_style = style.inherit().apply( style.default( node.tag.name )).apply(  node.tag.attributes.style ), node_options = { ...options };
+                    const localPath = node.tag ? [ ...path, this.nextPathPart( node ) ] : path;
+                    const ssss = getMatchingStyle( localPath, this.stylesheet );
+                    let node_style = style.inherit()
+                        .apply( style.default( node.tag.name ))
+                        .apply(  node.tag.attributes.style )
+                        .apply( ssss );
+
+                    let node_options = { ...options };
 
                     ( node.tag.name === 'a' ) && ( node_options.link = node.tag.attributes.href );
 
@@ -119,7 +147,7 @@ export default class Layout
         return inline;
     }
 
-    private compile_table( rows, style: Style )
+    private compile_table( rows, style: Style, path: NodePath = [] )
     {
         let compiled = [], rowNo = 0;
 
@@ -127,16 +155,25 @@ export default class Layout
         {
             if( row.tag )
             {
-                let row_style = style.inherit().apply( style.default( row.tag.name )).apply( row.tag.attributes.style );
+                const localPath = [ ...path, this.nextPathPart( row ) ];
+                const ssss = getMatchingStyle( localPath, this.stylesheet );
+                let row_style = style.inherit()
+                    .apply( style.default( row.tag.name ))
+                    .apply( row.tag.attributes.style )
+                    .apply( ssss );
 
                 for( let cell of row.tag.nodes )
                 {
                     if( cell.tag )
                     {
+                        const localPath = [ ...path, this.nextPathPart( cell ) ];
+
+                        const ssss = getMatchingStyle( localPath, this.stylesheet );
                         let cell_style = row_style.inherit()
                             .apply( style.default( row.tag.name ))
                             // TODO: apply <style> for correct path
-                            .apply( cell.tag.attributes.style );
+                            .apply( cell.tag.attributes.style )
+                            .apply( ssss );
 
                         compiled.push(
                         {
@@ -146,7 +183,7 @@ export default class Layout
                             row     : rowNo,
                             rows    : parseInt( cell.tag.attributes['rowspan'] || 1 ),
                             columns : parseInt( cell.tag.attributes['colspan'] || 1 ),
-                            elements: this.compile( cell.tag.nodes, cell_style.inherit() )
+                            elements: this.compile( cell.tag.nodes, cell_style.inherit(), localPath )
                         });
                     }
                 }
@@ -158,7 +195,7 @@ export default class Layout
         return compiled;
     }
 
-    private compile( nodes: Node[], style: Style )
+    private compile( nodes: Node[], style: Style, path: NodePath = [] )
     {
         let compiled = [];
 
@@ -166,9 +203,15 @@ export default class Layout
         {
             for( let i = 0; i < nodes.length; ++i )
             {
+                const localPath = nodes[i].tag ? [ ...path, this.nextPathPart( nodes[i] ) ] : path;
+
                 if( nodes[i].tag && !INLINE_TAGS.includes( nodes[i].tag.name ))
                 {
-                    let node_style = style.inherit().apply( style.default( nodes[i].tag.name )).apply( nodes[i].tag.attributes.style );
+                    const ssss = getMatchingStyle( localPath, this.stylesheet );
+                    let node_style = style.inherit()
+                        .apply( style.default( nodes[i].tag.name ))
+                        .apply( nodes[i].tag.attributes.style )
+                        .apply( ssss );
 
                     if( nodes[i].tag.name === 'table' )
                     {
@@ -177,7 +220,7 @@ export default class Layout
                             type        : 'grid',
                             tag         : nodes[i].tag.name,
                             style       : node_style,
-                            elements    : this.compile_table( nodes[i].tag.nodes, node_style.inherit() ),
+                            elements    : this.compile_table( nodes[i].tag.nodes, node_style.inherit(), [...path, this.nextPathPart( nodes[i] )] ),
                             attributes  : nodes[i].tag.attributes
                         });
                     }
@@ -188,7 +231,7 @@ export default class Layout
                             type        : 'block',
                             tag         : nodes[i].tag.name,
                             style       : node_style,
-                            elements    : this.compile( nodes[i].tag.nodes, node_style.inherit() ),
+                            elements    : this.compile( nodes[i].tag.nodes, node_style.inherit(), localPath ),
                             attributes  : nodes[i].tag.attributes
                         });
                     }
@@ -197,7 +240,7 @@ export default class Layout
                 {
                     let inline: InlineElement[] = [];
 
-                    i = this.compile_inline( inline, nodes, style, {}, i );
+                    i = this.compile_inline( inline, nodes, style, {}, i, localPath );
 
                     if( true ) //this.compress_inline( inline ).length )
                     {
@@ -212,17 +255,12 @@ export default class Layout
         return compiled;
     }
 
-    get outerHeight()
+    private nextPathPart( node: Node )
     {
-        return this.elements.reduce(( h, e ) => h += e.outerHeight, 0 ); // TODO margin padding
-    }
-
-    render( x: number, y: number )
-    {
-        for( let element of this.elements )
+        if( 'tag' in node )
         {
-            element.render( x, y );
-            y += y.outerHeight;
+            const res = { tag: node.tag.name, ids: node.tag.attributes.id?.split(' '), classes: node.tag.attributes.class?.split(' ') };
+            return res;
         }
     }
 }

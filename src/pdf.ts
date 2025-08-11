@@ -3,7 +3,7 @@
 // TODO cropbox na pdf nastavovat
 
 import fs from 'fs';
-import Document from './document';
+import Document, { StyleSheet } from './document';
 import { Element, Block } from './elements';
 import PDFKit from 'pdfkit';
 import PDFDocument = PDFKit.PDFDocument;
@@ -21,13 +21,17 @@ export type LiqdPDFDocument = PDFDocument & {
     _fontSize: number
 }
 
-function parseStyle( style: string | null ): Record<string, string>
+function parseStyle( style: string | null ): StyleSheet
 {
     const parsed = [];
 
     for( let [ _, selector, rules ] of style?.matchAll(/([^{]+)\{([^{]+)\}/g) || [] )
     {
-        parsed.push({ selector: selector.replaceAll(/\s*\n\s*/g, ' ').trim(), rules: ( rules.replaceAll(/\s*\n\s*/g, ' ') + ';' ).replaceAll(/(\s*;\s*)+/g, ';') });
+        const selectors = selector.replaceAll(/\s*\n\s*/g, ' ').trim().split(',').map( s => s.trim() );
+        for ( const selector of selectors )
+        {
+            parsed.push({ selector, rules: ( rules.replaceAll(/\s*\n\s*/g, ' ') + ';' ).replaceAll(/(\s*;\s*)+/g, ';') });
+        }
     }
 
     return parsed;
@@ -73,15 +77,13 @@ export default class PDF
 
     async render( data: object, options, filename: string, documentOptions )
     {
-        let style = parseStyle( this.style ? ( await this.template.render( await this.style, {} )).match( STYLE_RE )![1] : '');
-
-        console.log( style ); process.exit( 0 );
+        let stylesheet = parseStyle( this.style ? ( await this.template.render( await this.style, {} )).match( STYLE_RE )![1] : '');
 
         let main = PDFParser.parse( await this.template.render( this.main, { ...options, props: { ...( options.props || {}), data }}));
         let header = this.header ? async( props = {}) => PDFParser.parse( await this.template.render( this.header, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
         let footer = this.footer ? async( props = {}) => PDFParser.parse( await this.template.render( this.footer, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
 
-        let document = new Document({ main, header, footer }, documentOptions );
+        let document = new Document({ main, header, footer, stylesheet }, documentOptions );
 
         await document.render();
 
