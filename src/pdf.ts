@@ -28,6 +28,7 @@ const Compile = ( template: any, source: string ) => template.compile( `if( true
 const HEADER_RE = /<header(\s[^>]+)?>[\s\S]+<\/header>/;
 const FOOTER_RE = /<footer(\s[^>]+)?>[\s\S]+<\/footer>/;
 const MAIN_RE = /<main(\s[^>]+)?>[\s\S]+<\/main>/;
+const STYLE_RE = /<style>[\s\S]+<\/style>/;
 
 export type PDFOptions = { dictionaries?: object[], locale?: string }
 
@@ -37,6 +38,7 @@ export default class PDF
     private readonly main;
     private readonly header;
     private readonly footer;
+    private readonly style;
 
     constructor( template: string, options: PDFOptions )
     {
@@ -47,6 +49,7 @@ export default class PDF
         this.main = MAIN_RE.test( template ) ? Compile( this.template, template.match( MAIN_RE )![0] ) : null;
         this.header = HEADER_RE.test( template ) ? Compile( this.template, template.match( HEADER_RE )![0] ) : null;
         this.footer = FOOTER_RE.test( template ) ? Compile( this.template, template.match( FOOTER_RE )![0] ) : null;
+        // this.style = STYLE_RE.test( template ) ?  : null;
 
         //console.log( this.main, this.header, this.footer );
 
