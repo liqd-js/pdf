@@ -60,10 +60,12 @@ export default class Layout
 
     private compile_inline( inline: InlineElement[], nodes: Node[], style: Style, options, i = 0, path: NodePath = [] )
     {
+        let index = 0;
         for( ; i < nodes.length; ++i )
         {
             if( 'tag' in nodes[i] )
             {
+                index++;
                 const node = nodes[i] as NodeTag;
                 if( !INLINE_TAGS.includes( node.tag.name )){ return i - 1 }
 
@@ -73,12 +75,11 @@ export default class Layout
                 }
                 else
                 {
-                    const localPath = node.tag ? [ ...path, this.nextPathPart( node ) ] : path;
-                    const ssss = getMatchingStyle( localPath, this.stylesheet );
+                    const localPath = node.tag ? [ ...path, this.nextPathPart( node, index ) ] : path;
                     let node_style = style.inherit()
                         .apply( style.default( node.tag.name ))
                         .apply(  node.tag.attributes.style )
-                        .apply( ssss );
+                        .apply( getMatchingStyle( localPath, this.stylesheet ) );
 
                     let node_options = { ...options };
 
@@ -151,29 +152,31 @@ export default class Layout
     {
         let compiled = [], rowNo = 0;
 
+        let rowIndex = 0;
+
         for( let row of rows )
         {
             if( row.tag )
             {
-                const localPath = [ ...path, this.nextPathPart( row ) ];
-                const ssss = getMatchingStyle( localPath, this.stylesheet );
+                rowIndex++;
+                const localPath = [ ...path, this.nextPathPart( row, rowIndex ) ];
                 let row_style = style.inherit()
                     .apply( style.default( row.tag.name ))
                     .apply( row.tag.attributes.style )
-                    .apply( ssss );
+                    .apply( getMatchingStyle( localPath, this.stylesheet ) );
 
+                let cellIndex = 0;
                 for( let cell of row.tag.nodes )
                 {
                     if( cell.tag )
                     {
-                        const localPath = [ ...path, this.nextPathPart( cell ) ];
+                        cellIndex++;
+                        const localPath = [ ...path, this.nextPathPart( cell, cellIndex ) ];
 
-                        const ssss = getMatchingStyle( localPath, this.stylesheet );
                         let cell_style = row_style.inherit()
                             .apply( style.default( row.tag.name ))
-                            // TODO: apply <style> for correct path
                             .apply( cell.tag.attributes.style )
-                            .apply( ssss );
+                            .apply( getMatchingStyle( localPath, this.stylesheet ) );
 
                         compiled.push(
                         {
@@ -201,17 +204,18 @@ export default class Layout
 
         if( nodes )
         {
+            let index = 0;
             for( let i = 0; i < nodes.length; ++i )
             {
-                const localPath = nodes[i].tag ? [ ...path, this.nextPathPart( nodes[i] ) ] : path;
+                nodes[i].tag && index++;
+                const localPath = nodes[i].tag ? [ ...path, this.nextPathPart( nodes[i], nodes[i].tag ? index : undefined ) ] : path;
 
                 if( nodes[i].tag && !INLINE_TAGS.includes( nodes[i].tag.name ))
                 {
-                    const ssss = getMatchingStyle( localPath, this.stylesheet );
                     let node_style = style.inherit()
                         .apply( style.default( nodes[i].tag.name ))
                         .apply( nodes[i].tag.attributes.style )
-                        .apply( ssss );
+                        .apply( getMatchingStyle( localPath, this.stylesheet ) );
 
                     if( nodes[i].tag.name === 'table' )
                     {
@@ -220,7 +224,7 @@ export default class Layout
                             type        : 'grid',
                             tag         : nodes[i].tag.name,
                             style       : node_style,
-                            elements    : this.compile_table( nodes[i].tag.nodes, node_style.inherit(), [...path, this.nextPathPart( nodes[i] )] ),
+                            elements    : this.compile_table( nodes[i].tag.nodes, node_style.inherit(), [...path, this.nextPathPart( nodes[i], index )] ),
                             attributes  : nodes[i].tag.attributes
                         });
                     }
@@ -255,12 +259,16 @@ export default class Layout
         return compiled;
     }
 
-    private nextPathPart( node: Node )
+    private nextPathPart( node: Node, index?: number ): StyleSheet[number]
     {
         if( 'tag' in node )
         {
-            const res = { tag: node.tag.name, ids: node.tag.attributes.id?.split(' '), classes: node.tag.attributes.class?.split(' ') };
-            return res;
+            return {
+                tag: node.tag.name,
+                ids: node.tag.attributes.id?.split( ' ' ),
+                classes: node.tag.attributes.class?.split( ' ' ),
+                index: index
+            };
         }
     }
 }

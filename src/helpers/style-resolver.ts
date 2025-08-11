@@ -1,27 +1,31 @@
 import { StyleSheet } from "../document";
 
-type PathNode = {
+type NodePath = {
     tag: string;
     ids?: string[];
     classes?: string[];
+    index?: number;
 };
 
-export function getMatchingStyle( paths: PathNode[], styles: StyleSheet ): string
+export function getMatchingStyle(
+    paths: NodePath[],
+    styles: StyleSheet
+): string
 {
     const matched: string[] = [];
 
-    for ( const style of styles )
+    for ( const { selector, rules } of styles )
     {
-        if ( matchesSelector( paths, style.selector ) )
+        if ( matchesSelector( paths, selector ) )
         {
-            matched.push( style.rules.trim() );
+            matched.push( rules.trim() );
         }
     }
 
-    return matched.join(' ');
+    return matched.join( ' ' );
 }
 
-function matchesSelector( paths: PathNode[], selector: string ): boolean
+function matchesSelector( paths: NodePath[], selector: string ): boolean
 {
     const tokens = selector.trim().replace( /\s*>\s*/g, ' > ' ).split( /\s+/ );
 
@@ -64,17 +68,84 @@ function matchesSelector( paths: PathNode[], selector: string ): boolean
     return matchFrom( 0, 0 );
 }
 
-function matchSimple( node: PathNode | undefined, simpleSelector: string ): boolean
+function nthChildMatch( index: number | undefined, expr: string ): boolean
+{
+    if ( index === undefined ) return false;
+
+    expr = expr.trim().toLowerCase();
+    if ( expr === 'even' )
+    {
+        return index % 2 === 0;
+    }
+    if ( expr === 'odd' )
+    {
+        return index % 2 === 1;
+    }
+
+    const regex = /^([+-]?\d*)n([+-]\d+)?$/;
+    const match = expr.match( regex );
+
+    if ( match )
+    {
+        let a = match[1];
+        let b = match[2];
+
+        if ( a === '' || a === '+' ) a = '1';
+        else if ( a === '-' ) a = '-1';
+
+        const aNum = parseInt( a, 10 );
+        const bNum = b ? parseInt( b, 10 ) : 0;
+
+        if ( aNum === 0 )
+        {
+            return index === bNum;
+        }
+
+        const diff = index - bNum;
+        if ( diff < 0 ) return false;
+        return diff % aNum === 0;
+    }
+
+    const num = parseInt( expr, 10 );
+    if ( !isNaN( num ) )
+    {
+        return index === num;
+    }
+
+    return false;
+}
+
+function matchSimple( node: NodePath | undefined, simpleSelector: string ): boolean
 {
     if ( !node ) return false;
 
-    const tagMatch = simpleSelector.match( /^[a-zA-Z][a-zA-Z0-9_-]*/ );
-    const ids = [ ...simpleSelector.matchAll( /#([a-zA-Z0-9_-]+)/g ) ].map( m => m[1] );
-    const classes = [ ...simpleSelector.matchAll( /\.([a-zA-Z0-9_-]+)/g ) ].map( m => m[1] );
+    const notMatches = [ ...simpleSelector.matchAll( /:not\(([^)]+)\)/g ) ].map( m => m[1] );
+    simpleSelector = simpleSelector.replace( /:not\([^)]+\)/g, '' );
 
+    const nthChildMatches = [ ...simpleSelector.matchAll( /:nth-child\(([^)]+)\)/g ) ].map( m => m[1] );
+    simpleSelector = simpleSelector.replace( /:nth-child\([^)]+\)/g, '' );
+
+    const tagMatch = simpleSelector.match( /^[a-zA-Z][a-zA-Z0-9_-]*/ );
     if ( tagMatch && tagMatch[0] !== node.tag ) return false;
+
+    const ids = [ ...simpleSelector.matchAll( /#([a-zA-Z0-9_-]+)/g ) ].map( m => m[1] );
     if ( ids.length && !ids.every( id => (node.ids ?? []).includes( id ) ) ) return false;
+
+    const classes = [ ...simpleSelector.matchAll( /\.([a-zA-Z0-9_-]+)/g ) ].map( m => m[1] );
     if ( classes.length && !classes.every( c => (node.classes ?? []).includes( c ) ) ) return false;
+
+    for ( const expr of nthChildMatches )
+    {
+        if ( !nthChildMatch( node.index, expr ) ) return false;
+    }
+
+    for ( const notSel of notMatches )
+    {
+        if ( matchSimple( node, notSel ) )
+        {
+            return false;
+        }
+    }
 
     return true;
 }
