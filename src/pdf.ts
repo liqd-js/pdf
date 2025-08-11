@@ -21,6 +21,18 @@ export type LiqdPDFDocument = PDFDocument & {
     _fontSize: number
 }
 
+function parseStyle( style: string | null ): Record<string, string>
+{
+    const parsed = [];
+
+    for( let [ _, selector, rules ] of style?.matchAll(/([^{]+)\{([^{]+)\}/g) || [] )
+    {
+        parsed.push({ selector: selector.replaceAll(/\s*\n\s*/g, ' ').trim(), rules: ( rules.replaceAll(/\s*\n\s*/g, ' ') + ';' ).replaceAll(/(\s*;\s*)+/g, ';') });
+    }
+
+    return parsed;
+}
+
 const Load = ( filename: string ) => fs.readFileSync( filename, 'utf8' );
 const Compile = ( template: any, source: string ) => template.compile( `if( true ){ with( $props.data ){ <>${source}</>}}` );
 // TODO: template: type?    ^^^
@@ -28,7 +40,7 @@ const Compile = ( template: any, source: string ) => template.compile( `if( true
 const HEADER_RE = /<header(\s[^>]+)?>[\s\S]+<\/header>/;
 const FOOTER_RE = /<footer(\s[^>]+)?>[\s\S]+<\/footer>/;
 const MAIN_RE = /<main(\s[^>]+)?>[\s\S]+<\/main>/;
-const STYLE_RE = /<style>[\s\S]+<\/style>/;
+const STYLE_RE = /<style>([\s\S]+)<\/style>/;
 
 export type PDFOptions = { dictionaries?: object[], locale?: string }
 
@@ -49,6 +61,9 @@ export default class PDF
         this.main = MAIN_RE.test( template ) ? Compile( this.template, template.match( MAIN_RE )![0] ) : null;
         this.header = HEADER_RE.test( template ) ? Compile( this.template, template.match( HEADER_RE )![0] ) : null;
         this.footer = FOOTER_RE.test( template ) ? Compile( this.template, template.match( FOOTER_RE )![0] ) : null;
+        this.style = STYLE_RE.test( template ) ? this.template.compile( template.match( STYLE_RE )![0] ) : null;
+
+        //console.log( template, this.style ); process.exit( 0 );
         // this.style = STYLE_RE.test( template ) ?  : null;
 
         //console.log( this.main, this.header, this.footer );
@@ -58,6 +73,10 @@ export default class PDF
 
     async render( data: object, options, filename: string, documentOptions )
     {
+        let style = parseStyle( this.style ? ( await this.template.render( await this.style, {} )).match( STYLE_RE )![1] : '');
+
+        console.log( style ); process.exit( 0 );
+
         let main = PDFParser.parse( await this.template.render( this.main, { ...options, props: { ...( options.props || {}), data }}));
         let header = this.header ? async( props = {}) => PDFParser.parse( await this.template.render( this.header, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
         let footer = this.footer ? async( props = {}) => PDFParser.parse( await this.template.render( this.footer, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
