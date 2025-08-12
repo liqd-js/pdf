@@ -3,6 +3,7 @@
 import { LiqdPDFDocument } from "../pdf";
 import Style from "../style";
 import { Element, Grid, HorizontalRule, List, Image, Text } from ".";
+import { PageBreak } from "./page-break";
 
 export class Block extends Element
 {
@@ -23,6 +24,10 @@ export class Block extends Element
                 else if( n.tag === 'hr' )
                 {
                     return new HorizontalRule( document, n.style, this.innerWidth, undefined );
+                }
+                else if( n.tag === 'pb' )
+                {
+                    return new PageBreak( document, n.style, this.innerWidth, undefined );
                 }
                 else if( ['ul', 'ol' ].includes( n.tag ) )
                 {
