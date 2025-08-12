@@ -56,7 +56,7 @@ export default class PDF
     private readonly footer;
     private readonly style;
 
-    constructor( template: string, options: PDFOptions )
+    constructor( template: string, options: PDFOptions = {} )
     {
         this.template = new Template({ directories: [], ...options });
 

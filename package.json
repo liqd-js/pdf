@@ -28,12 +28,12 @@
   "dependencies": {
     "@liqd-js/parser": "^1.0.0",
     "@liqd-js/template": "^0.9.11",
-    "pdfkit": "^0.15.0",
+    "pdfkit": "^0.17.1",
     "svg-to-pdfkit": "^0.1.8"
   },
   "devDependencies": {
-    "@types/node": "^22.0.2",
-    "@types/pdfkit": "^0.13.4",
-    "typescript": "^5.5.4"
+    "@types/node": "^24.2.1",
+    "@types/pdfkit": "^0.17.2",
+    "typescript": "^5.9.2"
   }
 }
