@@ -104,4 +104,6 @@ dist
 .tern-port
 test/.DS_Store
 .DS_Store
-.DS_Store
+.DS_STORE
+
+.idea
