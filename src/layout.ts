@@ -5,9 +5,7 @@ import { LiqdPDFDocument } from "./pdf";
 import Style from "./style";
 import { ObjectHash } from './helpers/base';
 import { Node, NodeTag, NodeText, StyleSheet } from "./document";
-import { getMatchingStyle } from "./helpers/style-resolver";
-
-export type NodePath = Array<{ tag: string, ids?: string[], classes?: string[] }>
+import { getMatchingStyle, NodePath } from "./helpers/style-resolver";
 
 const INLINE_TAGS = [ 'a', 'b', 'u', 'strong', 'cite', 'code', 'em', 'i', 'q', 'small', 'span', 'sub', 'sup', 'br' ];
 const Equals = ( objA?: object, objB?: object ) =>  objA === objB || ( objA && objB && typeof objA === 'object' && typeof objB === 'object' && ObjectHash( objA ) === ObjectHash( objB ));
@@ -30,8 +28,6 @@ export default class Layout
     )
     {
         let width = this.document.page.width; // TODO this.document.width;
-
-        const x = this.compile( nodes, style, [] );
 
         this.elements = this.compile( nodes, style, [{tag: 'pdf'}] ).map( n =>
         {
@@ -58,7 +54,7 @@ export default class Layout
         }
     }
 
-    private compile_inline( inline: InlineElement[], nodes: Node[], style: Style, options, i = 0, path: NodePath = [] )
+    private compile_inline( inline: InlineElement[], nodes: Node[], style: Style, options, i = 0, path: NodePath[] = [] )
     {
         let index = 0;
         for( ; i < nodes.length; ++i )
@@ -75,7 +71,7 @@ export default class Layout
                 }
                 else
                 {
-                    const localPath = node.tag ? [ ...path, this.nextPathPart( node, index ) ] : path;
+                    const localPath = node.tag ? [ ...path, this.nextPathPart( node, nodes, index ) ] : path;
                     let node_style = style.inherit()
                         .apply( style.default( node.tag.name ))
                         .apply(  node.tag.attributes.style )
@@ -148,7 +144,7 @@ export default class Layout
         return inline;
     }
 
-    private compile_table( rows, style: Style, path: NodePath = [] )
+    private compile_table( rows, style: Style, path: NodePath[] = [] )
     {
         let compiled = [], rowNo = 0;
 
@@ -159,7 +155,7 @@ export default class Layout
             if( row.tag )
             {
                 rowIndex++;
-                const localPath = [ ...path, this.nextPathPart( row, rowIndex ) ];
+                const localPath = [ ...path, this.nextPathPart( row, rows, rowIndex ) ];
                 let row_style = style.inherit()
                     .apply( style.default( row.tag.name ))
                     .apply( row.tag.attributes.style )
@@ -171,7 +167,7 @@ export default class Layout
                     if( cell.tag )
                     {
                         cellIndex++;
-                        const localPath = [ ...path, this.nextPathPart( cell, cellIndex ) ];
+                        const localPath = [ ...path, this.nextPathPart( cell, row.tag.nodes, cellIndex ) ];
 
                         let cell_style = row_style.inherit()
                             .apply( style.default( row.tag.name ))
@@ -198,7 +194,7 @@ export default class Layout
         return compiled;
     }
 
-    private compile( nodes: Node[], style: Style, path: NodePath = [] )
+    private compile( nodes: Node[], style: Style, path: NodePath[] = [] )
     {
         let compiled = [];
 
@@ -208,7 +204,7 @@ export default class Layout
             for( let i = 0; i < nodes.length; ++i )
             {
                 nodes[i].tag && index++;
-                const localPath = nodes[i].tag ? [ ...path, this.nextPathPart( nodes[i], nodes[i].tag ? index : undefined ) ] : path;
+                const localPath = nodes[i].tag ? [ ...path, this.nextPathPart( nodes[i], nodes, nodes[i].tag ? index : undefined ) ] : path;
 
                 if( nodes[i].tag && !INLINE_TAGS.includes( nodes[i].tag.name ))
                 {
@@ -224,7 +220,7 @@ export default class Layout
                             type        : 'grid',
                             tag         : nodes[i].tag.name,
                             style       : node_style,
-                            elements    : this.compile_table( nodes[i].tag.nodes, node_style.inherit(), [...path, this.nextPathPart( nodes[i], index )] ),
+                            elements    : this.compile_table( nodes[i].tag.nodes, node_style.inherit(), [...path, this.nextPathPart( nodes[i], nodes, index )] ),
                             attributes  : nodes[i].tag.attributes
                         });
                     }
@@ -259,7 +255,7 @@ export default class Layout
         return compiled;
     }
 
-    private nextPathPart( node: Node, index?: number ): StyleSheet[number]
+    private nextPathPart( node: Node, allNodes: Node[], index?: number ): NodePath[] | undefined
     {
         if( 'tag' in node )
         {
@@ -267,7 +263,8 @@ export default class Layout
                 tag: node.tag.name,
                 ids: node.tag.attributes.id?.split( ' ' ),
                 classes: node.tag.attributes.class?.split( ' ' ),
-                index: index
+                index: index,
+                total: allNodes.filter( n => 'tag' in n ).length
             };
         }
     }

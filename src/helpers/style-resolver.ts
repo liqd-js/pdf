@@ -1,10 +1,11 @@
 import { StyleSheet } from "../document";
 
-type NodePath = {
+export type NodePath = {
     tag: string;
     ids?: string[];
     classes?: string[];
     index?: number;
+    total?: number;
 };
 
 export function getMatchingStyle(
@@ -121,6 +122,18 @@ function matchSimple( node: NodePath | undefined, simpleSelector: string ): bool
 
     const notMatches = [ ...simpleSelector.matchAll( /:not\(([^)]+)\)/g ) ].map( m => m[1] );
     simpleSelector = simpleSelector.replace( /:not\([^)]+\)/g, '' );
+
+    if ( /:first-child/.test( simpleSelector ) )
+    {
+        if ( node.index !== 1 ) return false;
+        simpleSelector = simpleSelector.replace( /:first-child/g, '' );
+    }
+
+    if ( /:last-child/.test( simpleSelector ) )
+    {
+        if ( node.index !== node.total ) return false;
+        simpleSelector = simpleSelector.replace( /:last-child/g, '' );
+    }
 
     const nthChildMatches = [ ...simpleSelector.matchAll( /:nth-child\(([^)]+)\)/g ) ].map( m => m[1] );
     simpleSelector = simpleSelector.replace( /:nth-child\([^)]+\)/g, '' );
