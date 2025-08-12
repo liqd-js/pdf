@@ -59,14 +59,16 @@ function matchesSelector( paths: NodePath[], selector: string ): boolean
                 if ( matchFrom( pos + 1, selIdx + 1 ) ) return true;
             } else if ( comb === null )
             {
-                return true;
+                return pos === paths.length - 1;
             }
         }
 
         return false;
     }
 
-    return matchFrom( 0, 0 );
+     const res = matchFrom( 0, 0 );
+
+    return res;
 }
 
 function nthChildMatch( index: number | undefined, expr: string ): boolean
