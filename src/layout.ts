@@ -74,9 +74,8 @@ export default class Layout
                     const localPath = node.tag ? [ ...path, this.nextPathPart( node, nodes, index ) ] : path;
                     let node_style = style.inherit()
                         .apply( style.default( node.tag.name ))
-                        .apply(  node.tag.attributes.style )
-                        .apply( getMatchingStyle( localPath, this.stylesheet ) );
-
+                        .apply( getMatchingStyle( localPath, this.stylesheet ) )
+                        .apply(   node.tag.attributes.style );
                     let node_options = { ...options };
 
                     ( node.tag.name === 'a' ) && ( node_options.link = node.tag.attributes.href );
@@ -158,8 +157,8 @@ export default class Layout
                 const localPath = [ ...path, this.nextPathPart( row, rows, rowIndex ) ];
                 let row_style = style.inherit()
                     .apply( style.default( row.tag.name ))
-                    .apply( row.tag.attributes.style )
-                    .apply( getMatchingStyle( localPath, this.stylesheet ) );
+                    .apply( getMatchingStyle( localPath, this.stylesheet ) )
+                    .apply( row.tag.attributes.style );
 
                 let cellIndex = 0;
                 for( let cell of row.tag.nodes )
@@ -171,8 +170,8 @@ export default class Layout
 
                         let cell_style = row_style.inherit()
                             .apply( style.default( row.tag.name ))
-                            .apply( cell.tag.attributes.style )
-                            .apply( getMatchingStyle( localPath, this.stylesheet ) );
+                            .apply( getMatchingStyle( localPath, this.stylesheet ) )
+                            .apply( cell.tag.attributes.style );
 
                         compiled.push(
                         {
@@ -210,8 +209,8 @@ export default class Layout
                 {
                     let node_style = style.inherit()
                         .apply( style.default( nodes[i].tag.name ))
-                        .apply( nodes[i].tag.attributes.style )
-                        .apply( getMatchingStyle( localPath, this.stylesheet ) );
+                        .apply( getMatchingStyle( localPath, this.stylesheet ) )
+                        .apply( nodes[i].tag.attributes.style );
 
                     if( nodes[i].tag.name === 'table' )
                     {
