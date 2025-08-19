@@ -10,10 +10,15 @@ export type NodePath = {
 
 export function getMatchingStyle(
     paths: NodePath[],
-    styles: StyleSheet
+    styles?: StyleSheet
 ): string
 {
     const matched: string[] = [];
+
+    if ( !styles )
+    {
+        return '';
+    }
 
     for ( const { selector, rules } of styles )
     {

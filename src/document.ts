@@ -3,12 +3,11 @@ import Style from "./style";
 import Layout from "./layout";
 import { LiqdPDFDocument } from "./pdf";
 
-
-export type Node = NodeTag | NodeText | NodeWs; // TODO: check text type
+export type Node = NodeTag | NodeText | NodeWs;
 export type NodeTag = {
     tag: {
         name: string
-        attributes: Record<string, string>      // TODO: type napr. {style: '...'}
+        attributes: Record<string, string>
         nodes: Node[]
     }
 }
@@ -21,22 +20,22 @@ export type NodeWs = { ws: string }
 
 export type StyleSheet = Array<{ selector: string, rules: string }>
 
-type PDF = {
+export type DocumentPDF = {
     main: { nodes: Node[] }
-    header?: ( props: unknown ) => Promise<{ nodes: Node[] }>;
-    footer?: ( props: unknown ) => Promise<{ nodes: Node[] }>;
+    header?: ( props: any ) => Promise<{ nodes: Node[] }>;
+    footer?: ( props: any ) => Promise<{ nodes: Node[] }>;
     stylesheet?: StyleSheet
 }
 
 export default class Document
 {
-    private pdf: PDF;
+    private pdf: DocumentPDF;
     private readonly document: LiqdPDFDocument;
     private readonly style: Style;
     private readonly stylesheet?: StyleSheet;
     private readonly options?: any;
 
-    constructor( pdf: PDF, options?: any )
+    constructor( pdf: DocumentPDF, options?: any )
     {
         this.pdf = pdf;
         this.style = new Style( 'font-size: 10px; text-align: left; color: black; font-family: Helvetica;');

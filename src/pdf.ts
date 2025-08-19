@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 // TODO cropbox na pdf nastavovat
 
 import fs from 'fs';
@@ -12,7 +10,7 @@ const Template = require('@liqd-js/template');
 const PDFParser = new Parser( __dirname + '/pdf.syntax' );
 const SVGtoPDF = require('svg-to-pdfkit');
 
-PDFKit.prototype.addSVG = function( svg: string, x: number, y: number, options )
+PDFKit.prototype.addSVG = function( svg: string, x: number, y: number, options: any )
 {
     return SVGtoPDF(this, svg, x, y, options), this;
 };
@@ -75,7 +73,7 @@ export default class PDF
         //this.templates.content = this.template.compile( content );
     }
 
-    async render( data: object, options, filename: string, documentOptions )
+    async render( data: object, options: any, filename: string, documentOptions: any )
     {
         let stylesheet = parseStyle( this.style ? ( await this.template.render( await this.style, {} )).match( STYLE_RE )![1] : '');
 

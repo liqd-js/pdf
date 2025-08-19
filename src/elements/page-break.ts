@@ -18,8 +18,8 @@ export class PageBreak extends Element
     async render( x:number, y:number )
     {
         this.document.addPage();
-        this.y = y;
         this.x = x;
+        this.y = y;
         super.render( x, x );
     }
 }

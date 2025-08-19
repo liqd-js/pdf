@@ -10,20 +10,15 @@ import { getMatchingStyle, NodePath } from "./helpers/style-resolver";
 const INLINE_TAGS = [ 'a', 'b', 'u', 'strong', 'cite', 'code', 'em', 'i', 'q', 'small', 'span', 'sub', 'sup', 'br' ];
 const Equals = ( objA?: object, objB?: object ) =>  objA === objB || ( objA && objB && typeof objA === 'object' && typeof objB === 'object' && ObjectHash( objA ) === ObjectHash( objB ));
 
-export type InlineElement = {
-    text: string;
-    style?: Style;
-    options?: Record<string, any>;
-}
-
 export default class Layout
 {
     private readonly elements: Element[] = [];
 
     constructor(
         private document: LiqdPDFDocument,
-        private style: Style,
-        nodes: Node[], options,
+        style: Style,
+        nodes: Node[],
+        options: any,
         private stylesheet?: StyleSheet,
     )
     {
@@ -35,7 +30,7 @@ export default class Layout
             {
                 return new Block( document, n.style, width, undefined, n.elements, options );
             }
-        });
+        }).filter( e => !!e );
 
         console.log( require('util').inspect( this.elements, { colors: true, depth: Infinity }));
     }
@@ -50,11 +45,11 @@ export default class Layout
         for( let element of this.elements )
         {
             element.render( x, y );
-            y += y.outerHeight;
+            y += element.outerHeight;
         }
     }
 
-    private compile_inline( inline: InlineElement[], nodes: Node[], style: Style, options, i = 0, path: NodePath[] = [] )
+    private compile_inline( inline, nodes: Node[], style: Style, options: any, i = 0, path: NodePath[] = [] )
     {
         let index = 0;
         for( ; i < nodes.length; ++i )
@@ -75,7 +70,8 @@ export default class Layout
                     let node_style = style.inherit()
                         .apply( style.default( node.tag.name ))
                         .apply( getMatchingStyle( localPath, this.stylesheet ) )
-                        .apply(   node.tag.attributes.style );
+                        .apply( node.tag.attributes.style );
+
                     let node_options = { ...options };
 
                     ( node.tag.name === 'a' ) && ( node_options.link = node.tag.attributes.href );
@@ -102,7 +98,7 @@ export default class Layout
         return i;
     }
 
-    private compress_inline( inline: InlineElement[] )
+    private compress_inline( inline )
     {
         for( let i = 0; i < inline.length; ++i )
         {
@@ -143,7 +139,7 @@ export default class Layout
         return inline;
     }
 
-    private compile_table( rows, style: Style, path: NodePath[] = [] )
+    private compile_table( rows: Node[], style: Style, path: NodePath[] = [] )
     {
         let compiled = [], rowNo = 0;
 
@@ -151,7 +147,7 @@ export default class Layout
 
         for( let row of rows )
         {
-            if( row.tag )
+            if( 'tag' in row )
             {
                 rowIndex++;
                 const localPath = [ ...path, this.nextPathPart( row, rows, rowIndex ) ];
@@ -163,7 +159,7 @@ export default class Layout
                 let cellIndex = 0;
                 for( let cell of row.tag.nodes )
                 {
-                    if( cell.tag )
+                    if( 'tag' in cell )
                     {
                         cellIndex++;
                         const localPath = [ ...path, this.nextPathPart( cell, row.tag.nodes, cellIndex ) ];
@@ -179,8 +175,8 @@ export default class Layout
                             tag     : cell.tag.name,
                             style   : cell_style,
                             row     : rowNo,
-                            rows    : parseInt( cell.tag.attributes['rowspan'] || 1 ),
-                            columns : parseInt( cell.tag.attributes['colspan'] || 1 ),
+                            rows    : parseInt( cell.tag.attributes['rowspan'] || '1' ),
+                            columns : parseInt( cell.tag.attributes['colspan'] || '1' ),
                             elements: this.compile( cell.tag.nodes, cell_style.inherit(), localPath )
                         });
                     }
@@ -202,42 +198,48 @@ export default class Layout
             let index = 0;
             for( let i = 0; i < nodes.length; ++i )
             {
-                nodes[i].tag && index++;
-                const localPath = nodes[i].tag ? [ ...path, this.nextPathPart( nodes[i], nodes, nodes[i].tag ? index : undefined ) ] : path;
+                let localPath: NodePath[] | undefined = path;
 
-                if( nodes[i].tag && !INLINE_TAGS.includes( nodes[i].tag.name ))
+                if ( 'tag' in nodes[i] )
                 {
-                    let node_style = style.inherit()
-                        .apply( style.default( nodes[i].tag.name ))
-                        .apply( getMatchingStyle( localPath, this.stylesheet ) )
-                        .apply( nodes[i].tag.attributes.style );
+                    const node = nodes[i] as NodeTag;
+                    index++;
+                    localPath = [ ...path, this.nextPathPart( node, nodes, index ) ];
 
-                    if( nodes[i].tag.name === 'table' )
+                    if( !INLINE_TAGS.includes( node.tag.name ))
                     {
-                        compiled.push(
+                        let node_style = style.inherit()
+                            .apply( style.default( node.tag.name ))
+                            .apply( getMatchingStyle( localPath, this.stylesheet ) )
+                            .apply( node.tag.attributes.style );
+
+                        if( node.tag.name === 'table' )
                         {
-                            type        : 'grid',
-                            tag         : nodes[i].tag.name,
-                            style       : node_style,
-                            elements    : this.compile_table( nodes[i].tag.nodes, node_style.inherit(), [...path, this.nextPathPart( nodes[i], nodes, index )] ),
-                            attributes  : nodes[i].tag.attributes
-                        });
-                    }
-                    else
-                    {
-                        compiled.push(
+                            compiled.push(
+                                {
+                                    type        : 'grid',
+                                    tag         : node.tag.name,
+                                    style       : node_style,
+                                    elements    : this.compile_table( node.tag.nodes, node_style.inherit(), [...path, this.nextPathPart( node, nodes, index )] ),
+                                    attributes  : node.tag.attributes
+                                });
+                        }
+                        else
                         {
-                            type        : 'block',
-                            tag         : nodes[i].tag.name,
-                            style       : node_style,
-                            elements    : this.compile( nodes[i].tag.nodes, node_style.inherit(), localPath ),
-                            attributes  : nodes[i].tag.attributes
-                        });
+                            compiled.push(
+                                {
+                                    type        : 'block',
+                                    tag         : node.tag.name,
+                                    style       : node_style,
+                                    elements    : this.compile( node.tag.nodes, node_style.inherit(), localPath ),
+                                    attributes  : node.tag.attributes
+                                });
+                        }
                     }
                 }
                 else
                 {
-                    let inline: InlineElement[] = [];
+                    let inline = [];
 
                     i = this.compile_inline( inline, nodes, style, {}, i, localPath );
 
@@ -254,17 +256,14 @@ export default class Layout
         return compiled;
     }
 
-    private nextPathPart( node: Node, allNodes: Node[], index?: number ): NodePath[] | undefined
+    private nextPathPart( node: NodeTag, allNodes: Node[], index?: number ): NodePath
     {
-        if( 'tag' in node )
-        {
-            return {
-                tag: node.tag.name,
-                ids: node.tag.attributes.id?.split( ' ' ),
-                classes: node.tag.attributes.class?.split( ' ' ),
-                index: index,
-                total: allNodes.filter( n => 'tag' in n ).length
-            };
-        }
+        return {
+            tag: node.tag.name,
+            ids: node.tag.attributes.id?.split( ' ' ),
+            classes: node.tag.attributes.class?.split( ' ' ),
+            index: index,
+            total: allNodes.filter( n => 'tag' in n ).length
+        };
     }
 }
