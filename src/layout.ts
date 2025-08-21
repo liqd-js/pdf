@@ -199,42 +199,39 @@ export default class Layout
             for( let i = 0; i < nodes.length; ++i )
             {
                 let localPath: NodePath[] | undefined = path;
+                const node = nodes[i] as NodeTag;
 
-                if ( 'tag' in nodes[i] )
+                if ( 'tag' in node && !INLINE_TAGS.includes( node.tag.name ) )
                 {
-                    const node = nodes[i] as NodeTag;
                     index++;
                     localPath = [ ...path, this.nextPathPart( node, nodes, index ) ];
 
-                    if( !INLINE_TAGS.includes( node.tag.name ))
-                    {
-                        let node_style = style.inherit()
-                            .apply( style.default( node.tag.name ))
-                            .apply( getMatchingStyle( localPath, this.stylesheet ) )
-                            .apply( node.tag.attributes.style );
+                    let node_style = style.inherit()
+                        .apply( style.default( node.tag.name ))
+                        .apply( getMatchingStyle( localPath, this.stylesheet ) )
+                        .apply( node.tag.attributes.style );
 
-                        if( node.tag.name === 'table' )
-                        {
-                            compiled.push(
-                                {
-                                    type        : 'grid',
-                                    tag         : node.tag.name,
-                                    style       : node_style,
-                                    elements    : this.compile_table( node.tag.nodes, node_style.inherit(), [...path, this.nextPathPart( node, nodes, index )] ),
-                                    attributes  : node.tag.attributes
-                                });
-                        }
-                        else
-                        {
-                            compiled.push(
-                                {
-                                    type        : 'block',
-                                    tag         : node.tag.name,
-                                    style       : node_style,
-                                    elements    : this.compile( node.tag.nodes, node_style.inherit(), localPath ),
-                                    attributes  : node.tag.attributes
-                                });
-                        }
+                    if( node.tag.name === 'table' )
+                    {
+                        compiled.push(
+                            {
+                                type        : 'grid',
+                                tag         : node.tag.name,
+                                style       : node_style,
+                                elements    : this.compile_table( node.tag.nodes, node_style.inherit(), [...path, this.nextPathPart( node, nodes, index )] ),
+                                attributes  : node.tag.attributes
+                            });
+                    }
+                    else
+                    {
+                        compiled.push(
+                            {
+                                type        : 'block',
+                                tag         : node.tag.name,
+                                style       : node_style,
+                                elements    : this.compile( node.tag.nodes, node_style.inherit(), localPath ),
+                                attributes  : node.tag.attributes
+                            });
                     }
                 }
                 else
