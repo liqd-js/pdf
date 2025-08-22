@@ -70,10 +70,14 @@ export class Text extends Element
                 // lineheight
                 {
                     let lineHeight = string.style?.lineHeight ? string.style.compute('lineHeight') : height;
+                    if ( lineHeight < height )
+                    {
+                        lineHeight = height;
+                    }
 
-                    baseline += ( lineHeight - height ) / 2;
-                    cap += ( lineHeight - height ) / 2;
-                    height = lineHeight;
+                    // baseline += ( lineHeight - height ) / 2;
+                    // cap += ( lineHeight - height ) / 2;
+                    // height = lineHeight;
                 }
                 underline = ( string.style?.textDecoration === 'underline' );
 
