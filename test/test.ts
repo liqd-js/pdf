@@ -155,6 +155,7 @@ const invoice =
     note: 'spolocnost zapisana v registri',
     // logo: __dirname + '/logo-3.png',
 
+    // logo: 'test\\images\\medical-logo.svg',
     logo: 'test\\logo-3.png',
 }
 

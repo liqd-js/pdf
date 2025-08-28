@@ -1,6 +1,8 @@
 import { LiqdPDFDocument } from "../pdf";
-import Style from "../style";
+import Style, { PT_to_PX } from "../style";
 import { Element } from ".";
+import sizeOf from "image-size";
+import fs from "fs";
 
 const Load = ( filename: string ) => require('fs').readFileSync( filename, 'utf8' );
 
@@ -40,12 +42,15 @@ export class Image extends Element
 
     get contentHeight()
     {
-        if( this.#src.includes( 'qr.svg' ))
-        {
-            return this.innerWidth;
-        }
+        const dimensions = sizeOf( fs.readFileSync( this.#src ) );
+        const ratio = dimensions.width / dimensions.height;
+        const h = this.style.compute('height');
+        const w = this.style.compute('width');
 
-        return 30.600000000765 - 2 * 1.275;
+        if ( !h && w ) { return w / ratio; }
+        else if ( !w && h ) { return h; }
+
+        return dimensions.height / PT_to_PX;
     }
 
     render( x: number, y: number )
@@ -58,19 +63,40 @@ export class Image extends Element
         {
             let svg = Load( this.#src );
 
-            let { width, height } = svg.match( /viewbox="-?[0-9.]+\s+-?[0-9.]+\s+(?<width>-?[0-9.]+)\s+(?<height>-?[0-9.]+)"/i ).groups;
+            let { width, height } = this.calculateDimensions();
 
-            //console.log( 'IMG', svg, this.innerX(x), this.innerY(y), width, height, this.innerHeight * parseFloat( width ) / parseFloat( height ), this.innerHeight );
-
-            //this.document.rect( this.innerX(x), this.innerY(y), this.innerHeight * parseFloat( width ) / parseFloat( height ), this.innerHeight ).fill( 'red' );
-
-            this.document.addSVG( svg, this.innerX(x), this.innerY(y), { width: this.innerHeight * parseFloat( width ) / parseFloat( height ), height: this.innerHeight });
+            this.document.addSVG( svg, this.innerX(x), this.innerY(y), { width: this.innerHeight * width / height, height: this.innerHeight });
 
             // TODO mozno tiez fit
         }
-        else if( this.#src.endsWith('.jpg') || this.#src.endsWith('.png') )
+        else if( this.#src.endsWith('.jpg') || this.#src.endsWith('.jpeg') || this.#src.endsWith('.png') )
         {
-            this.document.image( this.#src, this.innerX(x), this.innerY(y), { fit: [ this.innerHeight, this.innerHeight ]});
+            let { width, height } = this.calculateDimensions();
+
+            if ( this.style.get('objectFit') === 'cover' )
+            {
+                let align: any = undefined, valign: any = undefined;
+
+                if ( this.style.get('objectPosition') === 'center' )
+                {
+                    align = 'center';
+                    valign = 'center';
+                }
+
+                this.document.save()
+                    .rect( this.innerX(x), this.innerY(y), width, height )
+                    .clip()
+                    .image( this.#src, this.innerX(x), this.innerY(y), { height, width, cover: [ width, height ], align, valign })
+                    .restore();
+            }
+            else if ( this.style.get('objectFit') === 'contain' )
+            {
+                this.document.image( this.#src, this.innerX(x), this.innerY(y), { fit: [ width, height ] });
+            }
+            else
+            {
+                this.document.image( this.#src, this.innerX(x), this.innerY(y), { width, height });
+            }
         }
         else if( this.#src.startsWith('data:') )
         {
@@ -95,5 +121,21 @@ export class Image extends Element
             element.render( x, y );
             y += element.outerHeight;
         }*/
+    }
+
+    calculateDimensions()
+    {
+        let height, width;
+        const dimensions = sizeOf( fs.readFileSync( this.#src ) );
+        const ratio = dimensions.width / dimensions.height;
+        const h = this.style.compute('height');
+        const w = this.style.compute('width');
+
+        if ( !h && w ) { width = w; height = w / ratio; }
+        else if ( !w && h ) { width = h * ratio; height = h; }
+        else if ( h && w ) { width = w; height = h; }
+        else { width = dimensions.width / PT_to_PX; height = dimensions.height / PT_to_PX; }
+
+        return { height, width };
     }
 }

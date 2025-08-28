@@ -17,7 +17,7 @@ const DEFAULT_PROPERTIES: Record<string, string> = {
 };
 
 const PT_to_MM = 0.3527764217;
-const PT_to_PX = 1.3333333333;
+export const PT_to_PX = 1.3333333333;
 
 const DEFAULT_STYLES: Record<string, string> = {
     a: 'color: blue; text-decoration: underline;',
@@ -83,6 +83,11 @@ export default class Style
         }
 
         return new Style( inheritedStyle );
+    }
+
+    get( property: string ): string | undefined
+    {
+        return this.hasOwnProperty( property ) ? this[property] : undefined;
     }
 
     compute( ...properties: string[] ): number
