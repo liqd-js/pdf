@@ -76,7 +76,7 @@ export default class PDF
         //this.templates.content = this.template.compile( content );
     }
 
-    async render( data: object, options: any, filename: string, documentOptions: any )
+    async render( data: object, options: any, filename: string, documentOptions: any = {} )
     {
         let stylesheet = parseStyle( this.style ? ( await this.template.render( await this.style, {} )).match( STYLE_RE )![1] : '');
 

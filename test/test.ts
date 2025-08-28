@@ -1,5 +1,3 @@
-//@ts-nocheck
-
 'use strict';
 
 //<page> </page>
@@ -7,7 +5,7 @@ import PDF from "../src/pdf";
 
 // const Invoice = new PDF( require('fs').readFileSync( __dirname + '/test-style-inline.html', 'utf8' ), { dictionaries:
 const Invoice = new PDF( require('fs').readFileSync( __dirname + '/hehe.html', 'utf8' ), {
-    fontPaths: [ 'C:\\Users\\jakub\\Desktop\\fonts' ],
+    fontPaths: [ 'C:\\Users\\jakub\\Desktop\\fonts', 'C:\\Windows\\Fonts' ],
     dictionaries:
 [
     {
@@ -36,7 +34,6 @@ const Invoice = new PDF( require('fs').readFileSync( __dirname + '/hehe.html', '
         "amount-to-be-paid"     : { "nl": "Het te betalen bedrag", "bg": "Сума за плащане", "cs": "Částka k úhradě", "da": "Beløb, der skal betales", "et": "Tasumisele kuuluv summa", "fr": "Montant à payer", "el": "Ποσο που πρεπει να πληρωθει", "hr": "Iznos za plaćanje", "en": "Amount to be paid", "lt": "Suma, kurią reikia sumokėti", "lv": "Summa, kas jāmaksā", "de": "Zu zahlender Betrag", "hu": "Fizetendő összeg", "pl": "Suma do zapłaty", "pt": "Montante a ser pago", "sk": "Čiastka k úhrade", "ro": "Suma de plată", "sl": "Znesek za plačilo", "es": "El monto a pagar", "sv": "Summa att betala", "it": "Somma da pagare", "fi": "Maksettava summa" },
 
         "basis"                 : { "nl": "De basis", "bg": "Основата", "cs": "Základ", "da": "Grundlaget", "et": "Alus", "fr": "La base", "el": "Η βάση", "hr": "Osnova", "en": "The basis", "lt": "Pagrindas", "lv": "Pamats", "de": "Die Basis", "hu": "Az alap", "pl": "Podstawy", "pt": "A base", "ro": "Baza", "sl": "Osnova", "es": "La base", "sv": "Grunden", "sk": "Základ", "it": "La base", "fi": "Perusta" },
-        "vat"                   : { "sk": "DPH", "cs": "DPH", "en": "VAT", "pl": "VAT", "hu": "ÁFA", "de": "MwSt.", "nl": "BTW", "bg": "ДДС", "da": "moms", "et": "km", "el": "ΦΠΑ", "es": "IVA", "fr": "TVA", "hr": "PDV", "it": "IVA", "lv": "PVN", "lt": "PVM", "mt": "VAT", "pt": "IVA", "ro": "TVA", "sl": "DDV", "fi": "ALV", "sv": "Moms" },
         "total"                 : { "nl": "In totaal", "bg": "Накратко", "cs": "Celkem", "da": "Ialt", "et": "Kokkuvõtteks", "fr": "En somme", "el": "Εν ολίγοις", "hr": "Ukupno", "en": "In sum", "lt": "Trumpai tariant", "lv": "Īsumā", "de": "In Summe", "hu": "Összegezve", "pl": "W sumie", "pt": "Em suma", "ro": "In suma", "sk": "Celkom", "sl": "Skratka", "es": "En suma", "sv": "Kortfattat", "it": "Insomma", "fi": "Yhteensä" },
         "total-with-vat"        : { "nl": "Totaal met btw", "bg": "Общо с ДДС", "cs": "Celkem s DPH", "da": "Samlet med moms", "et": "Kokku koos käibemaksuga", "fr": "Total avec TVA", "el": "Σύνολο με ΦΠΑ", "hr": "Ukupno s PDV-om", "en": "Total with VAT", "lt": "Iš viso su PVM", "lv": "Kopā ar PVN", "de": "Gesamt mit MwSt", "hu": "Összesen áfával", "pl": "Razem z VAT", "pt": "Total com IVA", "ro": "Total cu TVA", "sl": "Skupaj z DDV", "sk": "Celkom s DPH", "es": "Total con IVA", "sv": "Totalt med moms", "it": "Totale con IVA", "fi": "Yhteensä arvonlisäverollinen" },
         "vat-breakdown"         : { "nl": "BTW-specificatie vermeld in", "bg": "Разбивката по ДДС е посочена в", "cs": "Rozpis DPH uvedený v měně", "da": "Momsfordeling angivet i", "et": "aastal märgitud käibemaksu jaotus", "fr": "Répartition de la TVA indiquée dans", "el": "Η ανάλυση του ΦΠΑ αναφέρεται στο", "hr": "Raspored PDV-a naveden u", "en": "VAT breakdown stated in", "lt": "PVM paskirstymas nurodytas", "lv": "punktā norādītais PVN sadalījums", "de": "Umsatzsteueraufschlüsselung gem", "hu": "pontban feltüntetett áfa részletezés", "pl": "Podział podatku VAT podany w", "pt": "Repartição do IVA indicada em", "ro": "Defalcarea TVA menționată în", "sl": "Razčlenitev DDV je navedena v", "es": "desglose del IVA indicado en", "sk": "Rozpis DPH uvedený v", "sv": "Momsfördelning som anges i", "it": "Ripartizione IVA indicata in", "fi": "ALV:n erittely kohdassa" },
@@ -159,19 +156,18 @@ const invoice =
     // logo: __dirname + '/logo-3.png',
 
     logo: 'test\\logo-3.png',
-    _id: 1,
 }
 
 Invoice.render( invoice, { locale: 'sk', scope: 
 {
     format: 
     {
-        round : ( number, precision ) =>
+        round : ( number: number, precision: number ) =>
         {
             return Math.round( number * Math.pow( 10, precision )) /  Math.pow( 10, precision );
         },
 
-        price : ( number, options ) =>
+        price : ( number: number, options: any ) =>
         {
             let price = number.toLocaleString( options?.locale, { style: 'currency', currency: options?.currency, ...( options?.precision !== undefined ? { minimumFractionDigits: options?.precision, maximumFractionDigits: options?.precision } : undefined ) });
 
@@ -183,7 +179,7 @@ Invoice.render( invoice, { locale: 'sk', scope:
             return price;
         },
 
-        number : ( number, options ) =>
+        number : ( number: string | number, options: any ) =>
         {
             number = number.toLocaleString( options?.locale, { ...( options?.precision !== undefined ? { minimumFractionDigits: options.precision, maximumFractionDigits: options.precision } : undefined ) });
 
@@ -195,7 +191,7 @@ Invoice.render( invoice, { locale: 'sk', scope:
             return number;
         },
 
-        date: ( date, options ) =>
+        date: ( date: string | Date, options: any ) =>
         {
             return new Date( date ).toLocaleDateString( options?.locale, { year: 'numeric', month: 'numeric', day: 'numeric' });
         }

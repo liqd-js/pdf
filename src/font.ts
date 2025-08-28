@@ -67,13 +67,13 @@ export default class Font
                     }
 
                     // TODO: handle errors - remove from fonts array if generating fails
-                    promises.push(execAsync(`fonttools varLib.mutator ${file} wght=${i} -o ${fontPath}`));
+                    promises.push(execAsync(`fonttools varLib.mutator ${file} wght=${i} -o ${fontPath}`).catch( e => { console.error(`Error generating variable font ${fontPath}: ${e}`);  } ));
                 }
                 console.log(`Generated ${promises.length} fonts for ${file}`);
             }
             else
             {
-                const weight = font['OS/2'].usWeightClass || 400;
+                const weight = font['OS/2']?.usWeightClass || 400;
                 const italic = !!font.fullName.match(/(italic|oblique)/i);
                 if ( Font.isRegistered( font.familyName, weight, italic ) || !Font.isNeeded( requiredFonts, font.familyName, italic ) )
                 {

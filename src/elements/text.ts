@@ -167,7 +167,7 @@ export class Text extends Element
 
     private apply_style( style: Style )
     {
-        const font = Font.getFont( style.fontFamily || 'Comic Neue', style.fontWeight, style.fontStyle === 'italic' );
+        const font = Font.getFont( style.fontFamily || 'Arial', style.fontWeight, style.fontStyle === 'italic' );
 
         if ( !font )
         {

@@ -40,7 +40,7 @@ export default class Document
     constructor( pdf: DocumentPDF, options?: any )
     {
         this.pdf = pdf;
-        this.style = new Style( 'font-size: 10px; text-align: left; color: black; font-family: Comic Neue;');
+        this.style = new Style( 'font-size: 10pt; text-align: left; color: black; font-family: Arial;');
         this.stylesheet = this.pdf.stylesheet || undefined;
         this.fontPaths = options?.fontPaths || [];
 
