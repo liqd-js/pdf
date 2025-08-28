@@ -2,6 +2,7 @@ import PDFKit from "pdfkit";
 import Style from "./style";
 import Layout from "./layout";
 import { LiqdPDFDocument } from "./pdf";
+import Font from "./font";
 
 export type Node = NodeTag | NodeText | NodeWs;
 export type NodeTag = {
@@ -34,12 +35,14 @@ export default class Document
     private readonly style: Style;
     private readonly stylesheet?: StyleSheet;
     private readonly options?: any;
+    private readonly fontPaths: string[] = [];
 
     constructor( pdf: DocumentPDF, options?: any )
     {
         this.pdf = pdf;
-        this.style = new Style( 'font-size: 10px; text-align: left; color: black; font-family: Helvetica;');
+        this.style = new Style( 'font-size: 10px; text-align: left; color: black; font-family: Comic Neue;');
         this.stylesheet = this.pdf.stylesheet || undefined;
+        this.fontPaths = options?.fontPaths || [];
 
         this.document = new PDFKit({ size: 'A4', bufferPages: true, autoFirstPage: true, margin: 0 }) as LiqdPDFDocument;
         this.options = options;
@@ -73,10 +76,12 @@ export default class Document
 
         console.dir( this.pdf.main.nodes, { depth: null });
 
+        const fonts = await this.collectFonts();
+        const loadedFonts = await Font.setupFonts( this.fontPaths, fonts.map( f => ({ family: f })));
+
         if( this.pdf.header )
         {
-            const headerNodes = ( await this.pdf.header({ $page: 1 })).nodes;
-            const header = new Layout( this.document, this.style, headerNodes, this.options, this.stylesheet );
+            const header = new Layout( this.document, this.style, ( await this.pdf.header({ $page: 1 })).nodes, this.options, this.stylesheet );
             header.render( 0, 0 );
             headerHeight = header.outerHeight
         }
@@ -155,5 +160,76 @@ export default class Document
             this.document.pipe( require('fs').createWriteStream( filename || __dirname + '/../test/test.pdf')).on('finish', resolve);
             this.document.end();
         });
+    }
+
+    private async collectFonts(): Promise<string[]>
+    {
+        const fonts = new Set<string>();
+
+        const headerNodes = this.pdf.header ? ( await this.pdf.header({ $page: 1 })).nodes : undefined;
+        const footerNodes = this.pdf.footer ? ( await this.pdf.footer({ $page: 1 })).nodes : undefined;
+
+        this.collectFontsRec( this.pdf.main.nodes, fonts );
+        headerNodes && this.collectFontsRec( headerNodes, fonts );
+        footerNodes && this.collectFontsRec( footerNodes, fonts );
+
+        for ( const elem of this.stylesheet || [] )
+        {
+            const rules = new Style( elem.rules );
+            if( rules.fontFamily )
+            {
+                const families = Font.parseFontFamily(rules.fontFamily);
+                families.forEach( f => fonts.add( f ));
+            }
+        }
+
+        if ( this.style.fontFamily )
+        {
+            const families = Font.parseFontFamily(this.style.fontFamily);
+            families.forEach( f => fonts.add( f ));
+        }
+
+        return Array.from( fonts );
+    }
+
+    private collectFontsRec( nodes: Node[] | null, fonts: Set<string> = new Set() ): Set<string>
+    {
+        if ( !nodes )
+        {
+            return fonts;
+        }
+
+        for( let node of nodes )
+        {
+            if( 'tag' in node )
+            {
+                if( node.tag.name === 'img' )
+                {
+                    continue;
+                }
+
+                if( node.tag.attributes.style )
+                {
+                    let style = new Style( node.tag.attributes.style );
+                    if( style.fontFamily )
+                    {
+                        const families = Font.parseFontFamily(style.fontFamily);
+                        families.forEach( f => fonts.add( f ));
+                    }
+                }
+
+                this.collectFontsRec( node.tag.nodes, fonts );
+            }
+            else if( 'style' in node && node.style )
+            {
+                if( node.style.fontFamily )
+                {
+                    const family = node.style.fontFamily;
+                    fonts.add( family );
+                }
+            }
+        }
+
+        return fonts;
     }
 }

@@ -3,6 +3,7 @@
 import Style from "../style";
 import { LiqdPDFDocument } from "../pdf";
 import { Element } from ".";
+import Font from "../font";
 
 type TypeSet = {
     text: string;
@@ -166,69 +167,14 @@ export class Text extends Element
 
     private apply_style( style: Style )
     {
-        let font: string = '';
+        const font = Font.getFont( style.fontFamily || 'Comic Neue', style.fontWeight, style.fontStyle === 'italic' );
 
-        switch ( style.fontWeight + ( style.fontStyle ? '_'+style.fontStyle : '' ) )
+        if ( !font )
         {
-            case '100'                  :
-            case 'ultralight'           : font = __dirname + '/../../test/fonts/HelveticaNeue-UltraLight.ttf'; break;
-
-            case '100_italic'           :
-            case 'ultralight_italic'    : font = __dirname + '/../../test/fonts/HelveticaNeue-UltraLightItalic.ttf'; break;
-
-
-            case '200'                  :
-            case 'thin'                 : font = __dirname + '/../../test/fonts/HelveticaNeue-Light.ttf'; break;
-
-            case '200_italic'           :
-            case 'thin_italic'          : font = __dirname + '/../../test/fonts/HelveticaNeue-LightItalic.ttf'; break;
-
-
-            case '300'                  :
-            case 'light'                : font = __dirname + '/../../test/fonts/HelveticaNeue-Light.ttf'; break;
-
-            case '300_italic'           :
-            case 'light_italic'         : font = __dirname + '/../../test/fonts/HelveticaNeue-LightItalic.ttf'; break;
-
-
-            case '500'                  :
-            case 'medium'               : font = __dirname + '/../../test/fonts/HelveticaNeue-Medium.ttf'; break;
-
-            case '500_italic'           :
-            case 'medium_italic'        : font = __dirname + '/../../test/fonts/HelveticaNeue-MediumItalic.ttf'; break;
-
-
-            case '600'                  :
-            case '700'                  :
-            case '800'                  :
-            case '900'                  :
-            case 'bold'                 : font = __dirname + '/../../test/fonts/HelveticaNeue-Bold.ttf'; break;
-
-            case '600_italic'           :
-            case '700_italic'           :
-            case '800_italic'           :
-            case '900_italic'           :
-            case 'bold_italic'          : font = __dirname + '/../../test/fonts/HelveticaNeue-BoldItalic.ttf'; break;
-
-
-            case '400_italic'           :
-            case 'normal_italic'        :
-            case 'regular_italic'       :
-            case 'italic'               : font = __dirname + '/../../test/fonts/HelveticaNeue-Italic.ttf';
-
-            case '400'                  :
-            case 'normal'               :
-            case 'regular'              :
-            default                     : font = __dirname + '/../../test/fonts/HelveticaNeue.ttf';
+            throw new Error( `Font not found: ${style.fontFamily} ${style.fontWeight} ${style.fontStyle}` );
         }
 
-        //font = 'Courier';
-
-        //this.document.font( style.fontWeight === 'bold' ? '/System/Library/Fonts/Supplemental/Tahoma Bold.ttf' : '/System/Library/Fonts/Supplemental/Tahoma.ttf' )
-        //this.document.font( style.fontWeight === 'bold' ? '/System/Library/Fonts/Supplemental/Tahoma Bold.ttf' : '/System/Library/Fonts/HelveticaNeue.ttcHelveticaNeue-Thin' )
-        //this.document.font( '/System/Library/Fonts/HelveticaNeue.ttc', style.fontWeight === 'bold' ? 'HelveticaNeue-Bold' : 'HelveticaNeue-Light' )
-
-        this.document.font( font )
+        this.document.font( font?.path )
             //this.document.font( style.fontWeight === 'bold' ? 'F1' : 'F1' )
             .fontSize( style.compute( 'fontSize' ) )
             .fillColor( style.color, 1 )

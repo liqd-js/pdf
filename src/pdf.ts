@@ -44,7 +44,7 @@ const FOOTER_RE = /<footer(\s[^>]+)?>[\s\S]+<\/footer>/;
 const MAIN_RE = /<main(\s[^>]+)?>[\s\S]+<\/main>/;
 const STYLE_RE = /<style>([\s\S]+)<\/style>/;
 
-export type PDFOptions = { dictionaries?: object[], locale?: string }
+export type PDFOptions = { dictionaries?: object[], locale?: string, fontPaths: string[] };
 
 export default class PDF
 {
@@ -53,10 +53,13 @@ export default class PDF
     private readonly header;
     private readonly footer;
     private readonly style;
+    private readonly fontPaths: string[];
 
-    constructor( template: string, options: PDFOptions = {} )
+    constructor( template: string, options: PDFOptions )
     {
         this.template = new Template({ directories: [], ...options });
+
+        this.fontPaths = options.fontPaths;
 
         this.template.on( 'error', (e: any) => console.log( e ));
 
@@ -81,7 +84,7 @@ export default class PDF
         let header = this.header ? async( props = {}) => PDFParser.parse( await this.template.render( this.header, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
         let footer = this.footer ? async( props = {}) => PDFParser.parse( await this.template.render( this.footer, { ...options, props: { ...( options.props || {}), data: { ...data, ...props }}})) : undefined;
 
-        let document = new Document({ main, header, footer, stylesheet }, documentOptions );
+        let document = new Document({ main, header, footer, stylesheet }, { ...documentOptions, fontPaths: this.fontPaths } );
 
         await document.render();
 

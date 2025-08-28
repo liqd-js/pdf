@@ -13,7 +13,7 @@
   "scripts": {
     "test": "nyc mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "tmp-test": "ts-node test/test02.ts"
+    "tmp-test": "ts-node test/test.ts"
   },
   "repository": {
     "type": "git",
@@ -28,10 +28,12 @@
   "dependencies": {
     "@liqd-js/parser": "^1.0.0",
     "@liqd-js/template": "^0.9.11",
+    "fontkit": "^2.0.4",
     "pdfkit": "^0.17.1",
     "svg-to-pdfkit": "^0.1.8"
   },
   "devDependencies": {
+    "@types/fontkit": "^2.0.8",
     "@types/node": "^24.2.1",
     "@types/pdfkit": "^0.17.2",
     "typescript": "^5.9.2"

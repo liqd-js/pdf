@@ -6,7 +6,9 @@
 import PDF from "../src/pdf";
 
 // const Invoice = new PDF( require('fs').readFileSync( __dirname + '/test-style-inline.html', 'utf8' ), { dictionaries:
-const Invoice = new PDF( require('fs').readFileSync( __dirname + '/test-style-inline.html', 'utf8' ), { dictionaries:
+const Invoice = new PDF( require('fs').readFileSync( __dirname + '/hehe.html', 'utf8' ), {
+    fontPaths: [ 'C:\\Users\\jakub\\Desktop\\fonts' ],
+    dictionaries:
 [
     {
         "invoice"               : { "sk": "Faktúra", "cs": "Faktura", "en": "Invoice", "pl": "Faktura", "hu": "Számla", "de": "Rechnung", "nl": "Factuur", "bg": "фактура", "da": "Faktura", "et": "Arve", "el": "Τιμολόγιο", "es": "Factura", "fr": "Facturer", "hr": "Dostavnica", "it": "Fattura", "lv": "Rēķins", "lt": "Sąskaita faktūra", "mt": "Fattura", "pt": "Fatura", "ro": "Factura fiscala", "sl": "Račun", "fi": "Lasku", "sv": "Faktura" },
